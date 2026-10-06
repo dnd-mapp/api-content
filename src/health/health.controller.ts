@@ -4,7 +4,11 @@ import { HealthCheck, HealthCheckService, type HealthCheckResult } from '@nestjs
 /** The health endpoints that a container orchestrator probes, under `/health`. */
 @Controller('health')
 export class HealthController {
-    constructor(private readonly health: HealthCheckService) {}
+    private readonly healthCheckService: HealthCheckService;
+
+    constructor(healthCheckService: HealthCheckService) {
+        this.healthCheckService = healthCheckService;
+    }
 
     /**
      * The liveness probe. It passes as long as the process answers requests, so the orchestrator restarts the
@@ -13,7 +17,7 @@ export class HealthController {
     @Get('live')
     @HealthCheck()
     live(): Promise<HealthCheckResult> {
-        return this.health.check([]);
+        return this.healthCheckService.check([]);
     }
 
     /**
@@ -23,6 +27,6 @@ export class HealthController {
     @Get('ready')
     @HealthCheck()
     ready(): Promise<HealthCheckResult> {
-        return this.health.check([]);
+        return this.healthCheckService.check([]);
     }
 }
