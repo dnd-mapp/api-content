@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
   "name": "@dnd-mapp/content-api",
-  "description": "The D&D Mapp content API: a NestJS application with the health endpoints that Kubernetes and Docker probe.",
+  "description": "The D&D Mapp content API: a NestJS application that serves the static content of the game, such as races, classes, backgrounds, items, spells, and the rules and mechanics.",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
