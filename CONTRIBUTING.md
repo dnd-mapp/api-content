@@ -78,7 +78,7 @@ The health endpoints have different jobs. The liveness probe tells the orchestra
 
 The `build` script compiles the application with the Nest CLI into `dist`. [SWC](https://swc.rs/) transpiles the files, and `tsc` type checks them in parallel, so a type error fails the build without slowing the transpilation down. The `start` script compiles and runs it once, `start-dev` recompiles and restarts it as you edit, and `start-prod` runs the build in `dist`.
 
-Tests use Vitest. The specs in `src` test a class through a testing module from `@nestjs/testing`, and the end-to-end spec in `test` starts the whole application and requests it with [supertest](https://github.com/ladjs/supertest). Vitest reads `experimentalDecorators` and `emitDecoratorMetadata` from the TypeScript project, so the decorators of NestJS work without a plugin. Coverage must stay above the thresholds in `vitest.config.ts`.
+Tests use Vitest. The specs in `src` test a class through a testing module from `@nestjs/testing` that imports the module of the class, so the module resolves the dependencies the same way it does in the application, and the end-to-end spec in `test` starts the whole application and requests it with [supertest](https://github.com/ladjs/supertest). Vitest reads `experimentalDecorators` and `emitDecoratorMetadata` from the TypeScript project, so the decorators of NestJS work without a plugin. Coverage must stay above the thresholds in `vitest.config.ts`.
 
 Check and format the repository with these commands. CI runs `format-check`, `lint-md`, `lint-ts`, `typecheck`, `test-ci`, `build`, `docker build`, and actionlint. Run them yourself before you open a pull request.
 
