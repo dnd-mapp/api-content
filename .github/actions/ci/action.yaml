@@ -1,5 +1,5 @@
 name: CI checks
-description: Installs dependencies, checks formatting, lints Markdown and code, type checks, tests, builds the application and its image, and lints workflows
+description: Installs dependencies, checks formatting, lints Markdown and code, type checks, tests, builds, and lints workflows
 
 runs:
     using: composite
@@ -34,10 +34,6 @@ runs:
         - name: Build
           shell: bash
           run: pnpm run build
-
-        - name: Build the image
-          shell: bash
-          run: docker build --tag dnd-mapp/api-content .
 
         - name: Lint workflows
           uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0

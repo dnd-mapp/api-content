@@ -20,7 +20,7 @@ Dependency versions live in the catalogs in `pnpm-workspace.yaml`, which uses `c
 
 Newly published releases are held back for three days through `minimumReleaseAge`. You may need to wait before you can bump to a very recent version.
 
-Install [actionlint](https://github.com/rhysd/actionlint) to lint the workflows locally, for example with `brew install actionlint`. CI runs the version that `.github/actions/ci/action.yaml` pins. Install [Docker](https://docs.docker.com/get-started/get-docker/) to build the image locally.
+Install [actionlint](https://github.com/rhysd/actionlint) to lint the workflows locally, for example with `brew install actionlint`. CI runs the version that `.github/actions/ci/action.yaml` pins.
 
 ## Git hooks
 
@@ -46,7 +46,6 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                             |
 | `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                |
 | `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                   |
-| `Dockerfile`                      | Builds the image that runs the compiled application, with a `HEALTHCHECK`    |
 | `tsconfig.json`                   | The solution file, which refers to the application, spec, and tools projects |
 | `tsconfig.app.json`               | The application project, which the type check of `nest build` reads          |
 | `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                              |
@@ -79,7 +78,7 @@ The `build` script compiles the application with the Nest CLI into `dist`. [SWC]
 
 Tests use Vitest. The specs in `src` test a class through a testing module from `@nestjs/testing` that imports the module of the class, so the module resolves the dependencies the same way it does in the application. An end-to-end suite will follow in a later change. Vitest reads `experimentalDecorators` and `emitDecoratorMetadata` from the TypeScript project, so the decorators of NestJS work without a plugin. Coverage must stay above the thresholds in `vitest.config.ts`.
 
-Check and format the repository with these commands. CI runs `format-check`, `lint-md`, `lint-ts`, `typecheck`, `test-ci`, `build`, `docker build`, and actionlint. Run them yourself before you open a pull request.
+Check and format the repository with these commands. CI runs `format-check`, `lint-md`, `lint-ts`, `typecheck`, `test-ci`, `build`, and actionlint. Run them yourself before you open a pull request.
 
 ```bash
 pnpm run format-check
@@ -89,7 +88,6 @@ pnpm run lint-ts
 pnpm run typecheck
 pnpm run test-ci
 pnpm run build
-docker build --tag dnd-mapp/api-content .
 actionlint
 ```
 
