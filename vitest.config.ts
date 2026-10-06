@@ -1,8 +1,15 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 const isCI = Boolean(process.env['CI']);
 
 export default defineConfig({
+    resolve: {
+        // Keep in sync with the `paths` of `tsconfig.app.json`.
+        alias: {
+            '@/health': fileURLToPath(new URL('./src/health/index.ts', import.meta.url)),
+        },
+    },
     server: { watch: { ignored: ['**/.vitest/**'] } },
     test: {
         coverage: {

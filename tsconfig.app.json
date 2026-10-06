@@ -10,6 +10,9 @@
         "module": "esnext",
         "moduleResolution": "bundler",
         "noEmit": true,
+        "paths": {
+            "@/health": ["./src/health/index.ts"]
+        },
         "rootDir": "src",
         "verbatimModuleSyntax": true
     }

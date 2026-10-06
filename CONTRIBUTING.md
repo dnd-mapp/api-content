@@ -42,6 +42,7 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the port |
 | `src/app.module.ts`               | The root module, which imports the feature modules                           |
 | `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller       |
+| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias           |
 | `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                             |
 | `test/health.e2e-spec.ts`         | The end-to-end spec, which starts the application and requests the endpoints |
 | `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                |
@@ -53,6 +54,8 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `tsconfig.tools.json`             | The tools project, for the config files in the repository root               |
 
 Import local files without an extension. SWC appends `.js` in the build because `resolveFully` is on, and `tsc` and Vitest resolve the import through the `bundler` module resolution.
+
+Every module under `src` has an `index.ts` that exports only what other modules need from it, and a path alias such as `@/health` that maps to that file. Import another module through its alias, never through a path into its directory, and keep the module itself free of imports from its own alias. The aliases live in the `paths` of `tsconfig.app.json`, which `tsc` and the Nest CLI read, and in the `resolve.alias` of `vitest.config.ts`. Add a new module to both.
 
 Generate a module, controller, or provider with the Nest CLI, which places it under `src`:
 
