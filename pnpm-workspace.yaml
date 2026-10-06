@@ -1,0 +1,61 @@
+minimumReleaseAge: 4320 # 3 days
+minimumReleaseAgeExclude:
+  - "@dnd-mapp/*"
+trustPolicy: no-downgrade
+trustPolicyIgnoreAfter: 4320 # 3 days
+
+# Peer Dependency Settings
+autoInstallPeers: false
+dedupePeers: true
+strictPeerDependencies: true
+
+# CLI Settings
+engineStrict: true
+
+# Build Settings
+allowBuilds:
+  lefthook: true
+sideEffectsCache: false
+
+# Other Settings
+catalogMode: "strict"
+savePrefix: "~"
+
+catalog:
+  "@dnd-mapp/changelog-tools": ~1.1.1
+  "@dnd-mapp/config-typescript": ~1.1.0
+  "@types/node": ~24.19.1
+  typescript: ~6.0.3
+catalogs:
+  commitlint:
+    "@commitlint/cli": ~21.2.3
+    "@dnd-mapp/config-commitlint": ~1.1.0
+    lefthook: ~2.1.16
+  eslint:
+    "@dnd-mapp/config-eslint": ~1.1.0
+    eslint: ~10.11.0
+  markdown:
+    "@dnd-mapp/config-markdown": ~1.0.0
+    markdownlint-cli2: ~0.23.3
+  nestjs:
+    "@nestjs/cli": ~12.0.8
+    "@nestjs/common": ~12.1.2
+    "@nestjs/core": ~12.1.2
+    "@nestjs/platform-express": ~12.1.2
+    "@nestjs/schematics": ~12.0.6
+    "@nestjs/terminus": ~12.1.0
+    "@nestjs/testing": ~12.1.2
+    "@types/express": ~5.0.6
+    reflect-metadata: ~0.2.2
+    rxjs: ~7.8.2
+  prettier:
+    "@dnd-mapp/config-prettier": ~1.1.0
+    prettier: ~3.9.9
+    prettier-plugin-organize-imports: ~4.3.0
+  vitest:
+    "@types/supertest": ~7.2.1
+    "@vitest/coverage-v8": ~5.0.3
+    "@vitest/ui": ~5.0.3
+    supertest: ~7.3.1
+    vite: ~8.3.2
+    vitest: ~5.0.3

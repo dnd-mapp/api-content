@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.schemastore.org/package.json",
+  "name": "@dnd-mapp/content-api",
+  "description": "The D&D Mapp content API: a NestJS application with the health endpoints that Kubernetes and Docker probe.",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "author": "D&D Mapp",
+  "homepage": "https://github.com/dnd-mapp/content-api#readme",
+  "bugs": {
+    "url": "https://github.com/dnd-mapp/content-api/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dnd-mapp/content-api.git"
+  },
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start-dev": "nest start --watch",
+    "start-prod": "node dist/main.js",
+    "test": "vitest --ui",
+    "test-ci": "vitest run",
+    "typecheck": "tsc -b",
+    "lint-ts": "eslint",
+    "lint-md": "markdownlint-cli2",
+    "format": "prettier -w .",
+    "format-check": "prettier -c ."
+  },
+  "engines": {
+    "node": "^24.21.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.21.0",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.8.2",
+      "onFail": "error"
+    }
+  },
+  "dependencies": {
+    "@nestjs/common": "catalog:nestjs",
+    "@nestjs/core": "catalog:nestjs",
+    "@nestjs/platform-express": "catalog:nestjs",
+    "@nestjs/terminus": "catalog:nestjs",
+    "reflect-metadata": "catalog:nestjs",
+    "rxjs": "catalog:nestjs"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "catalog:commitlint",
+    "@dnd-mapp/changelog-tools": "catalog:",
+    "@dnd-mapp/config-commitlint": "catalog:commitlint",
+    "@dnd-mapp/config-eslint": "catalog:eslint",
+    "@dnd-mapp/config-markdown": "catalog:markdown",
+    "@dnd-mapp/config-prettier": "catalog:prettier",
+    "@dnd-mapp/config-typescript": "catalog:",
+    "@nestjs/cli": "catalog:nestjs",
+    "@nestjs/schematics": "catalog:nestjs",
+    "@nestjs/testing": "catalog:nestjs",
+    "@types/express": "catalog:nestjs",
+    "@types/node": "catalog:",
+    "@types/supertest": "catalog:vitest",
+    "@vitest/coverage-v8": "catalog:vitest",
+    "@vitest/ui": "catalog:vitest",
+    "eslint": "catalog:eslint",
+    "lefthook": "catalog:commitlint",
+    "markdownlint-cli2": "catalog:markdown",
+    "prettier": "catalog:prettier",
+    "prettier-plugin-organize-imports": "catalog:prettier",
+    "supertest": "catalog:vitest",
+    "typescript": "catalog:",
+    "vite": "catalog:vitest",
+    "vitest": "catalog:vitest"
+  }
+}
