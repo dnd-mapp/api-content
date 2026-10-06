@@ -1,0 +1,19 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "@dnd-mapp/config-typescript/node",
+    "include": ["src"],
+    "exclude": ["src/**/*.spec.ts"],
+    "compilerOptions": {
+        "allowImportingTsExtensions": true,
+        "composite": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "noEmitOnError": true,
+        "outDir": "dist",
+        "removeComments": true,
+        "rewriteRelativeImportExtensions": true,
+        "rootDir": "src",
+        "sourceMap": true,
+        "verbatimModuleSyntax": true
+    }
+}
