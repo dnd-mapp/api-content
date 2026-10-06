@@ -1,0 +1,19 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "@dnd-mapp/config-typescript/node",
+    "include": ["src"],
+    "exclude": ["src/**/*.spec.ts"],
+    "compilerOptions": {
+        "composite": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "noEmit": true,
+        "paths": {
+            "@/health": ["./src/health/index.ts"]
+        },
+        "rootDir": "src",
+        "verbatimModuleSyntax": true
+    }
+}

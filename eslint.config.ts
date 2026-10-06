@@ -13,5 +13,10 @@ export default defineConfig([
                 tsconfigRootDir: import.meta.dirname,
             },
         },
+        rules: {
+            '@typescript-eslint/explicit-member-accessibility': ['error', { overrides: { constructors: 'no-public' } }],
+            '@typescript-eslint/parameter-properties': 'error',
+            '@typescript-eslint/return-await': ['error', 'always'],
+        },
     },
 ]);

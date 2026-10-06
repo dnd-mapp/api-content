@@ -14,6 +14,7 @@ engineStrict: true
 
 # Build Settings
 allowBuilds:
+  "@swc/core": false # Its install script only checks that the native binary is present
   lefthook: true
 sideEffectsCache: false
 
@@ -48,14 +49,15 @@ catalogs:
     "@types/express": ~5.0.6
     reflect-metadata: ~0.2.2
     rxjs: ~7.8.2
+  swc:
+    "@swc/cli": ~0.8.1
+    "@swc/core": ~1.16.13
   prettier:
     "@dnd-mapp/config-prettier": ~1.1.0
     prettier: ~3.9.9
     prettier-plugin-organize-imports: ~4.3.0
   vitest:
-    "@types/supertest": ~7.2.1
     "@vitest/coverage-v8": ~5.0.3
     "@vitest/ui": ~5.0.3
-    supertest: ~7.3.1
     vite: ~8.3.2
     vitest: ~5.0.3
