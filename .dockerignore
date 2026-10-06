@@ -1,0 +1,8 @@
+.git/
+.idea/
+.vscode/
+.coverage/
+.vitest/
+dist/
+node_modules/
+*.tsbuildinfo
