@@ -1,6 +1,6 @@
 import { TerminusModule } from '@nestjs/terminus';
 import { Test } from '@nestjs/testing';
-import { HealthController } from './health.controller.ts';
+import { HealthController } from './health.controller';
 
 describe('HealthController', () => {
     let controller: HealthController;

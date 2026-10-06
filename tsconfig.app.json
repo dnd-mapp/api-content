@@ -4,16 +4,13 @@
     "include": ["src"],
     "exclude": ["src/**/*.spec.ts"],
     "compilerOptions": {
-        "allowImportingTsExtensions": true,
         "composite": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "noEmitOnError": true,
-        "outDir": "dist",
-        "removeComments": true,
-        "rewriteRelativeImportExtensions": true,
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "noEmit": true,
         "rootDir": "src",
-        "sourceMap": true,
         "verbatimModuleSyntax": true
     }
 }

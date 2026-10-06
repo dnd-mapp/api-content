@@ -62,6 +62,8 @@
     "@nestjs/cli": "catalog:nestjs",
     "@nestjs/schematics": "catalog:nestjs",
     "@nestjs/testing": "catalog:nestjs",
+    "@swc/cli": "catalog:swc",
+    "@swc/core": "catalog:swc",
     "@types/express": "catalog:nestjs",
     "@types/node": "catalog:",
     "@types/supertest": "catalog:vitest",

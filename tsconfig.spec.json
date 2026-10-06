@@ -4,7 +4,6 @@
     "include": ["src", "test"],
     "exclude": [],
     "compilerOptions": {
-        "noEmit": true,
         "rootDir": ".",
         "types": ["node", "vitest/globals"]
     }

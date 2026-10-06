@@ -4,7 +4,9 @@
     "sourceRoot": "src",
     "entryFile": "main",
     "compilerOptions": {
+        "builder": "swc",
         "deleteOutDir": true,
-        "tsConfigPath": "tsconfig.app.json"
+        "tsConfigPath": "tsconfig.app.json",
+        "typeCheck": true
     }
 }

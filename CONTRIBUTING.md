@@ -37,21 +37,22 @@ The pre-commit hooks only check files. Run `pnpm run format` to fix formatting i
 
 The repository is a NestJS workspace with a single application. The Nest CLI reads `nest-cli.json` to find the sources, the entry file, and the TypeScript project it compiles with.
 
-| File                              | Purpose                                                                            |
-|:----------------------------------|:-----------------------------------------------------------------------------------|
-| `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the port       |
-| `src/app.module.ts`               | The root module, which imports the feature modules                                 |
-| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller             |
-| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                                   |
-| `test/health.e2e-spec.ts`         | The end-to-end spec, which starts the application and requests the endpoints       |
-| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                      |
-| `Dockerfile`                      | Builds the image that runs the compiled application, with a `HEALTHCHECK`          |
-| `tsconfig.json`                   | The solution file, which refers to the application, spec, and tools projects       |
-| `tsconfig.app.json`               | The application project, which the Nest CLI compiles into `dist`                   |
-| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals and the `test` directory           |
-| `tsconfig.tools.json`             | The tools project, for the config files in the repository root                     |
+| File                              | Purpose                                                                      |
+|:----------------------------------|:-----------------------------------------------------------------------------|
+| `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the port |
+| `src/app.module.ts`               | The root module, which imports the feature modules                           |
+| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller       |
+| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                             |
+| `test/health.e2e-spec.ts`         | The end-to-end spec, which starts the application and requests the endpoints |
+| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                |
+| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                   |
+| `Dockerfile`                      | Builds the image that runs the compiled application, with a `HEALTHCHECK`    |
+| `tsconfig.json`                   | The solution file, which refers to the application, spec, and tools projects |
+| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads          |
+| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals and the `test` directory     |
+| `tsconfig.tools.json`             | The tools project, for the config files in the repository root               |
 
-Import local files with the `.ts` extension. `tsc` accepts it because `allowImportingTsExtensions` is on, rewrites it to `.js` in the build because `rewriteRelativeImportExtensions` is on, and Vitest resolves it as is.
+Import local files without an extension. SWC appends `.js` in the build because `resolveFully` is on, and `tsc` and Vitest resolve the import through the `bundler` module resolution.
 
 Generate a module, controller, or provider with the Nest CLI, which places it under `src`:
 
@@ -60,7 +61,7 @@ pnpm exec nest generate module <name>
 pnpm exec nest generate controller <name>
 ```
 
-The schematics write `.js` import extensions and a Jest-style spec. Change the extensions to `.ts`, and rewrite the spec for Vitest.
+The schematics write `.js` import extensions and a Jest-style spec. Drop the extensions, and rewrite the spec for Vitest.
 
 ## Changing the code
 
@@ -72,7 +73,7 @@ The health endpoints have different jobs. The liveness probe tells the orchestra
 
 ## Building and testing
 
-The `build` script compiles the application with the Nest CLI and `tsc` into `dist`. The `start` script compiles and runs it once, `start-dev` recompiles and restarts it as you edit, and `start-prod` runs the build in `dist`.
+The `build` script compiles the application with the Nest CLI into `dist`. [SWC](https://swc.rs/) transpiles the files, and `tsc` type checks them in parallel, so a type error fails the build without slowing the transpilation down. The `start` script compiles and runs it once, `start-dev` recompiles and restarts it as you edit, and `start-prod` runs the build in `dist`.
 
 Tests use Vitest. The specs in `src` test a class through a testing module from `@nestjs/testing`, and the end-to-end spec in `test` starts the whole application and requests it with [supertest](https://github.com/ladjs/supertest). Vitest reads `experimentalDecorators` and `emitDecoratorMetadata` from the TypeScript project, so the decorators of NestJS work without a plugin. Coverage must stay above the thresholds in `vitest.config.ts`.
 
