@@ -14,7 +14,9 @@ export default defineConfig({
     test: {
         coverage: {
             enabled: true,
-            exclude: ['src/main.ts'],
+            // The entry point and the root module only wire the application together, which the end-to-end suite
+            // will cover once it exists.
+            exclude: ['src/main.ts', 'src/app.module.ts'],
             include: ['src/**/*.ts'],
             provider: 'v8',
             reporter: ['text-summary', 'html'],
@@ -30,7 +32,7 @@ export default defineConfig({
         },
         environment: 'node',
         globals: true,
-        include: ['src/**/*.spec.ts', 'test/**/*.e2e-spec.ts'],
+        include: ['src/**/*.spec.ts'],
         mockReset: true,
         name: 'api-content',
         open: false,

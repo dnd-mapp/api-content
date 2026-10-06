@@ -66,7 +66,6 @@
     "@swc/core": "catalog:swc",
     "@types/express": "catalog:nestjs",
     "@types/node": "catalog:",
-    "@types/supertest": "catalog:vitest",
     "@vitest/coverage-v8": "catalog:vitest",
     "@vitest/ui": "catalog:vitest",
     "eslint": "catalog:eslint",
@@ -74,7 +73,6 @@
     "markdownlint-cli2": "catalog:markdown",
     "prettier": "catalog:prettier",
     "prettier-plugin-organize-imports": "catalog:prettier",
-    "supertest": "catalog:vitest",
     "typescript": "catalog:",
     "vite": "catalog:vitest",
     "vitest": "catalog:vitest"
