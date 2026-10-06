@@ -68,7 +68,7 @@ The schematics write `.js` import extensions and a Jest-style spec. Drop the ext
 
 ## Changing the code
 
-NestJS resolves the dependencies of a class from the types of its constructor parameters, so import a class that you inject as a value import, not as a type import. Declare a field for each dependency and assign it in the constructor, rather than using a parameter property, so the fields of a class are all declared in one place. Mark every other import that is only used as a type with `import type`, which `verbatimModuleSyntax` requires.
+NestJS resolves the dependencies of a class from the types of its constructor parameters, so import a class that you inject as a value import, not as a type import. Declare a field for each dependency and assign it in the constructor, rather than using a parameter property, so the fields of a class are all declared in one place. Mark every member of a class `public`, `protected`, or `private`, except the constructor. Return a promise from an `async` method with `return await`, so the method itself appears in the stack trace of a rejection. ESLint enforces all three. Mark every other import that is only used as a type with `import type`, which `verbatimModuleSyntax` requires.
 
 Only `src/main.ts` touches the process: it reads `PORT`, listens, and enables the shutdown hooks. Keep the modules, controllers, and providers free of that, so the specs can create the application through `@nestjs/testing` without side effects.
 

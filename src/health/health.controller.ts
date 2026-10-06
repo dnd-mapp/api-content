@@ -16,8 +16,8 @@ export class HealthController {
      */
     @Get('live')
     @HealthCheck()
-    live(): Promise<HealthCheckResult> {
-        return this.healthCheckService.check([]);
+    public async live(): Promise<HealthCheckResult> {
+        return await this.healthCheckService.check([]);
     }
 
     /**
@@ -26,7 +26,7 @@ export class HealthController {
      */
     @Get('ready')
     @HealthCheck()
-    ready(): Promise<HealthCheckResult> {
-        return this.healthCheckService.check([]);
+    public async ready(): Promise<HealthCheckResult> {
+        return await this.healthCheckService.check([]);
     }
 }
