@@ -1,19 +1,19 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
-  "name": "@dnd-mapp/content-api",
+  "name": "@dnd-mapp/api-content",
   "description": "The D&D Mapp content API: a NestJS application that serves the static content of the game, such as races, classes, backgrounds, items, spells, and the rules and mechanics.",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
   "type": "module",
   "author": "D&D Mapp",
-  "homepage": "https://github.com/dnd-mapp/content-api#readme",
+  "homepage": "https://github.com/dnd-mapp/api-content#readme",
   "bugs": {
-    "url": "https://github.com/dnd-mapp/content-api/issues"
+    "url": "https://github.com/dnd-mapp/api-content/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dnd-mapp/content-api.git"
+    "url": "git+https://github.com/dnd-mapp/api-content.git"
   },
   "scripts": {
     "build": "nest build",
