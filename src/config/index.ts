@@ -1,1 +1,2 @@
-export { environmentSchema, type Environment } from './environment';
+export { environmentSchema } from './environment';
+export { serverConfig } from './server.config';
