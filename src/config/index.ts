@@ -1,1 +1,1 @@
-export { validateEnvironment, type Environment } from './environment';
+export { environmentSchema, type Environment } from './environment';
