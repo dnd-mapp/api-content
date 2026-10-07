@@ -41,7 +41,9 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 |:----------------------------------|:--------------------------------------------------------------------------------------|
 | `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the host and port |
 | `src/app.module.ts`               | The root module, which loads the configuration and imports the feature modules        |
-| `src/config/environment.ts`       | The Zod schema that validates the environment variables                               |
+| `src/config/environment.ts`       | The Zod schema that validates every environment variable, merged from the namespaces  |
+| `src/config/server.config.ts`     | The `server` namespace, with the host and port that the server listens on             |
+| `src/config/empty-as-unset.ts`    | The helper that treats an empty environment variable as unset                         |
 | `src/config/index.ts`             | The public entry of the configuration, behind the `@/config` alias                    |
 | `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller                |
 | `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias                    |
@@ -71,9 +73,19 @@ The schematics write `.js` import extensions and a Jest-style spec. Drop the ext
 
 NestJS resolves the dependencies of a class from the types of its constructor parameters, so import a class that you inject as a value import, not as a type import. Declare a field for each dependency and assign it in the constructor, rather than using a parameter property, so the fields of a class are all declared in one place. Mark every member of a class `public`, `protected`, or `private`, except the constructor. Return a promise from an `async` method with `return await`, so the method itself appears in the stack trace of a rejection. ESLint enforces all three. Mark every other import that is only used as a type with `import type`, which `verbatimModuleSyntax` requires.
 
-Only `src/main.ts` and the `ConfigModule` in `src/app.module.ts` touch the process. `ConfigModule` loads the `.env` files and validates the environment variables, and `src/main.ts` listens and enables the shutdown hooks. Keep the feature modules, controllers, and providers free of that, so the specs can create them through `@nestjs/testing` without side effects.
+Only `src/main.ts`, the `ConfigModule` in `src/app.module.ts`, and the namespace factories in `src/config` touch the process. `ConfigModule` loads the `.env` files and validates the environment variables, the factories read them, and `src/main.ts` listens and enables the shutdown hooks. Keep the feature modules, controllers, and providers free of that, so the specs can create them through `@nestjs/testing` without side effects.
 
-Read configuration through the `ConfigService` of `@nestjs/config`, never through `process.env`. Type it as `ConfigService<Environment, true>` and pass `{ infer: true }` to `get`, so the value has the type that `Environment` gives it. `ConfigModule` validates the environment variables against the [Zod](https://zod.dev/) schema `environmentSchema` in `src/config/environment.ts`, and `Environment` is inferred from it. To add an environment variable, add it to the schema with its type, default, and constraints, and document it in `.env.example`, the README, and the changelog. Give each constraint an error that names what the value must be and the value it got, since `ConfigModule` puts the name of the variable in front of it. Zod's `default()` only covers a variable that is unset, so wrap the schema of an optional variable in `z.preprocess(emptyAsUnset, ...)` to treat an empty one the same way.
+Configuration is grouped into namespaces. Each one is made with `registerAs` of `@nestjs/config` in a `<name>.config.ts` file in `src/config`, and exported from `@/config`. A namespace has a [Zod](https://zod.dev/) schema keyed by the names of its environment variables. Its factory parses `process.env` with that schema and returns the values under camelCase names, such as `{ host, port }` for the `server` namespace.
+
+Read configuration through a namespace only, never through `process.env` or by the name of a variable through `ConfigService.get`. A provider injects a namespace with `@Inject(serverConfig.KEY)` and types it as `ConfigType<typeof serverConfig>`, and `src/main.ts` gets it with `app.get(serverConfig.KEY)`.
+
+`ConfigModule` validates the environment at startup against `environmentSchema` in `src/config/environment.ts`, which merges the schemas of all namespaces, so it reports every invalid variable at once. A factory parses its variables again, because it only sees `process.env`, which holds strings.
+
+Prefix the variables of a namespace with its name in upper case, such as `DATABASE_URL` for a `database` namespace, unless an outside convention fixes the name. The `server` namespace is such an exception: `HOST` and `PORT` keep their plain names, since hosting platforms set `PORT`.
+
+To add a namespace, create `src/config/<name>.config.ts` with its schema and factory, merge the shape of the schema into `environmentSchema`, and export the namespace from `src/config/index.ts`. Register a namespace that the whole application needs through `load` in `ConfigModule.forRoot`, as `server` is. A feature module loads its own namespace with `ConfigModule.forFeature`, such as `ConfigModule.forFeature(databaseConfig)`.
+
+To add an environment variable, add it to the schema of its namespace with its type, default, and constraints, return it from the factory, and document it in `.env.example`, the README, and the changelog. Give each constraint an error that names what the value must be and the value it got, since `ConfigModule` puts the name of the variable in front of it. Zod's `default()` only covers a variable that is unset, so wrap the schema of an optional variable in `z.preprocess(emptyAsUnset, ...)` to treat an empty one the same way.
 
 The health endpoints have different jobs. The liveness probe tells the orchestrator whether to restart the container, so it checks nothing but the process itself. The readiness probe tells the orchestrator whether to route traffic to the container, so a check for every dependency the application needs to serve a request belongs there, as a [Terminus health indicator](https://docs.nestjs.com/recipes/terminus).
 
