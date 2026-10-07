@@ -1,9 +1,18 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "@dnd-mapp/config-typescript/node",
     "references": [
         { "path": "./tsconfig.app.json" },
         { "path": "./tsconfig.spec.json" },
         { "path": "./tsconfig.tools.json" }
     ],
-    "files": []
+    "files": [],
+    "compilerOptions": {
+        "composite": true,
+        "noEmit": true,
+        "paths": {
+            "@/health": ["./src/health/index.ts"]
+        },
+        "verbatimModuleSyntax": true
+    }
 }

@@ -46,14 +46,14 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                             |
 | `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                |
 | `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                   |
-| `tsconfig.json`                   | The solution file, which refers to the application, spec, and tools projects |
+| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on      |
 | `tsconfig.app.json`               | The application project, which the type check of `nest build` reads          |
 | `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                              |
 | `tsconfig.tools.json`             | The tools project, for the config files in the repository root               |
 
 Import local files without an extension. SWC appends `.js` in the build because `resolveFully` is on, and `tsc` and Vitest resolve the import through the `bundler` module resolution.
 
-Every module under `src` has an `index.ts` that exports only what other modules need from it, and a path alias such as `@/health` that maps to that file. Import another module through its alias, never through a path into its directory, and keep the module itself free of imports from its own alias. The aliases live in the `paths` of `tsconfig.app.json`, which `tsc` and the Nest CLI read, and in the `resolve.alias` of `vitest.config.ts`. Add a new module to both.
+Every module under `src` has an `index.ts` that exports only what other modules need from it, and a path alias such as `@/health` that maps to that file. Import another module through its alias, never through a path into its directory, and keep the module itself free of imports from its own alias. The aliases live in the `paths` of `tsconfig.json`, which `tsc` and the Nest CLI read and Vitest picks up through `resolve.tsconfigPaths`. Add a new module there.
 
 Generate a module, controller, or provider with the Nest CLI, which places it under `src`:
 

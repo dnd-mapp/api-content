@@ -1,22 +1,17 @@
-import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 const isCI = Boolean(process.env['CI']);
 
 export default defineConfig({
-    resolve: {
-        // Keep in sync with the `paths` of `tsconfig.app.json`.
-        alias: {
-            '@/health': fileURLToPath(new URL('./src/health/index.ts', import.meta.url)),
-        },
-    },
+    // Resolve the path aliases from the `paths` of `tsconfig.json`.
+    resolve: { tsconfigPaths: true },
     server: { watch: { ignored: ['**/.vitest/**'] } },
     test: {
         coverage: {
             enabled: true,
             // The entry point and the root module only wire the application together, which the end-to-end suite
-            // will cover once it exists.
-            exclude: ['src/main.ts', 'src/app.module.ts'],
+            // will cover once it exists. The barrel files only re-export what each module shares.
+            exclude: ['src/main.ts', 'src/app.module.ts', 'src/**/index.ts'],
             include: ['src/**/*.ts'],
             provider: 'v8',
             reporter: ['text-summary', 'html'],
