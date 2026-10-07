@@ -13,7 +13,7 @@ jobs:
         # A pull request from a fork gets no secrets, and its Docker job pushed no image.
         if: github.event.pull_request.head.repo.full_name == github.repository
         runs-on: ubuntu-26.04
-        timeout-minutes: 5
+        timeout-minutes: 2
         permissions: {}
         # Shares its group with the Docker job in pull-request.yaml and cancels a build that is still running, so it
         # cannot push pr-<N> again after the tag is gone.
