@@ -9,6 +9,3 @@ import { serverSchema } from './server.config';
 export const environmentSchema = z.object({
     ...serverSchema.shape,
 });
-
-/** The environment variables that the application reads, once validated. */
-export type Environment = z.infer<typeof environmentSchema>;

@@ -1,3 +1,4 @@
+import { registerAs } from '@nestjs/config';
 import { z } from 'zod';
 import { emptyAsUnset } from './empty-as-unset';
 
@@ -29,4 +30,14 @@ export const serverSchema = z.object({
     HOST: z.preprocess(emptyAsUnset, host.default(DEFAULT_HOST)),
     /** The port that the server listens on. */
     PORT: z.preprocess(emptyAsUnset, port.default(DEFAULT_PORT)),
+});
+
+/**
+ * The `server` namespace: the host and the port that the server listens on. `ConfigModule` has already validated the
+ * variables at startup, but a factory only sees `process.env`, so it parses them again for their types.
+ */
+export const serverConfig = registerAs('server', () => {
+    const { HOST, PORT } = serverSchema.parse(process.env);
+
+    return { host: HOST, port: PORT };
 });

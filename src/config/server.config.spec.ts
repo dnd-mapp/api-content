@@ -1,4 +1,4 @@
-import { serverSchema } from './server.config';
+import { serverConfig, serverSchema } from './server.config';
 
 /** Returns the path and message of each issue that the schema reports for the environment. */
 function issuesOf(environment: Record<string, string>) {
@@ -54,4 +54,26 @@ describe('serverSchema', () => {
             ]);
         },
     );
+});
+
+describe('serverConfig', () => {
+    afterEach(() => {
+        vi.unstubAllEnvs();
+    });
+
+    it('reads the host and the port from HOST and PORT', () => {
+        vi.stubEnv('HOST', 'localhost');
+        vi.stubEnv('PORT', '8080');
+
+        expect(serverConfig()).toEqual({ host: 'localhost', port: 8080 });
+    });
+
+    // `ConfigModule` only copies a validated default into a variable that the process leaves unset, so an empty one
+    // reaches the factory as it is.
+    it('defaults the host and the port when the process sets HOST and PORT to empty values', () => {
+        vi.stubEnv('HOST', '');
+        vi.stubEnv('PORT', '');
+
+        expect(serverConfig()).toEqual({ host: '0.0.0.0', port: 3000 });
+    });
 });
