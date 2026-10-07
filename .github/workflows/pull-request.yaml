@@ -28,3 +28,60 @@ jobs:
               env:
                   BASE_SHA: ${{ github.event.pull_request.base.sha }}
                   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+    changes:
+        name: Detect changes
+        runs-on: ubuntu-26.04
+        timeout-minutes: 5
+        permissions:
+            pull-requests: read
+        outputs:
+            docker: ${{ steps.filter.outputs.docker }}
+        steps:
+            # Compares the whole pull request with its base through the GitHub API, so it needs no checkout. Once the
+            # pull request touches the image, every later push rebuilds pr-<N>.
+            - name: Detect changes to the image
+              id: filter
+              uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+              with:
+                  predicate-quantifier: some-with-excludes
+                  filters: |
+                      docker:
+                          - src/**
+                          - "!src/**/*.spec.ts"
+                          - .docker/healthcheck.js
+                          - package.json
+                          - pnpm-lock.yaml
+                          - pnpm-workspace.yaml
+                          - nest-cli.json
+                          - .swcrc
+                          - tsconfig*.json
+                          - Dockerfile
+                          - .dockerignore
+                          - docker-bake.hcl
+                          - .github/actions/docker/**
+                          - .github/workflows/pull-request.yaml
+
+    docker:
+        name: Docker
+        needs: changes
+        # A pull request from a fork gets no secrets, so it cannot push an image.
+        if: needs.changes.outputs.docker == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-26.04
+        timeout-minutes: 15
+        permissions:
+            contents: read
+        # Shares its group with the cleanup in pull-request-closed.yaml, which cancels a build that would push pr-<N>
+        # again after the pull request closes.
+        concurrency:
+            group: docker-pr-${{ github.event.pull_request.number }}
+            cancel-in-progress: true
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Build and push the image
+              uses: ./.github/actions/docker
+              with:
+                  username: ${{ vars.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}

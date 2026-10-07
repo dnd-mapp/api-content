@@ -31,6 +31,25 @@ jobs:
                   path: release-notes.md
                   if-no-files-found: error
 
+    # Rebuilds the image at the tag rather than retagging the build of main, so its labels and provenance name the
+    # version.
+    docker:
+        name: Docker
+        needs: verify
+        runs-on: ubuntu-26.04
+        timeout-minutes: 15
+        permissions:
+            contents: read
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Build and push the image
+              uses: ./.github/actions/docker
+              with:
+                  username: ${{ vars.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
+
     release:
         name: GitHub Release
         needs: verify
