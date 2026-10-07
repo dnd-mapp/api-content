@@ -10,7 +10,7 @@ Tests use Vitest. The specs in `src` test a class through a testing module from 
 
 ## Checks
 
-Check and format the repository with these commands. CI runs `format-check`, actionlint, `lint-docker`, `lint-md`, `lint-ts`, `typecheck`, `build`, and `test-ci`, in that order. Run them yourself before you open a pull request.
+Check and format the repository with these commands. CI runs `format-check`, actionlint, `lint-docker`, `lint-md`, a check of the size of the [Docker Hub description](docker.md#docker-hub-description), `lint-ts`, `typecheck`, `build`, and `test-ci`, in that order. Run them yourself before you open a pull request.
 
 ```bash
 pnpm run format-check

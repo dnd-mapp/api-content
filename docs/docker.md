@@ -71,7 +71,7 @@ The overview and the short description of the repository on Docker Hub come from
 
 The job does not wait for CI. The `CI` job of the pull request runs the same checks and is a required status check, and the ruleset requires the branch to be up to date before it merges. The text on `main` has therefore already passed. When two syncs overlap, the newer one cancels the older one.
 
-Docker Hub limits the short description to 100 bytes and the overview to 25,000 bytes, and the action truncates longer text with only a warning in the log. Write the links of the overview as absolute URLs, since the action resolves relative links from the root of the repository rather than from `.docker`. Edits made on Docker Hub itself last only until the next sync, so change the files instead.
+Docker Hub limits the short description to 100 bytes and the overview to 25,000 bytes, and the action truncates longer text with only a warning in the log. A step of the CI checks fails when either file is larger, counting the short description without its final newline. Write the links of the overview as absolute URLs, since the action resolves relative links from the root of the repository rather than from `.docker`. Edits made on Docker Hub itself last only until the next sync, so change the files instead.
 
 ### Credentials
 

@@ -1,5 +1,5 @@
 name: CI checks
-description: Installs dependencies, checks formatting, lints workflows, the Dockerfile, Markdown, and code, type checks, builds, and tests
+description: Installs dependencies, checks formatting, lints workflows, the Dockerfile, Markdown, and code, checks the size of the Docker Hub description, type checks, builds, and tests
 
 runs:
     using: composite
@@ -28,6 +28,26 @@ runs:
         - name: Lint Markdown
           shell: bash
           run: pnpm run lint-md
+
+        # Docker Hub limits the short description to 100 bytes and the overview to 25,000 bytes. The sync truncates
+        # longer text with only a warning in the log, so the check fails here instead. The sync drops the final newline
+        # of the short description, so the check does too.
+        - name: Check the size of the Docker Hub description
+          shell: bash
+          run: |
+              check_size() {
+                  local file=$1 bytes=$2 limit=$3
+                  if ((bytes > limit)); then
+                      echo "::error file=$file::$file is $bytes bytes, more than the $limit that Docker Hub allows."
+                      status=1
+                  fi
+              }
+
+              short_description=$(< .docker/short-description.txt)
+              status=0
+              check_size .docker/short-description.txt "$(printf '%s' "$short_description" | wc --bytes)" 100
+              check_size .docker/README.md "$(wc --bytes < .docker/README.md)" 25000
+              exit "$status"
 
         - name: Lint code
           shell: bash
