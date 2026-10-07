@@ -6,7 +6,7 @@ Thank you for your interest in contributing to the D&D Mapp content API.
 
 Open an [issue](https://github.com/dnd-mapp/api-content/issues) to discuss any change beyond a typo fix before you send a pull request. This avoids work on changes that do not fit the goals of the project.
 
-The [docs](docs) folder explains the [architecture](docs/architecture.md), the [configuration](docs/configuration.md), [building and testing](docs/building-and-testing.md), and [releasing](docs/releasing.md). Read the architecture before you change the code.
+The [docs](docs) folder explains the [architecture](docs/architecture.md), the [configuration](docs/configuration.md), [building and testing](docs/building-and-testing.md), [Docker](docs/docker.md), and [releasing](docs/releasing.md). Read the architecture before you change the code.
 
 ## Development setup
 

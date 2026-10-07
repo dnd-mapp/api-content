@@ -13,5 +13,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The `PORT` environment variable, which sets the port the server listens on. It defaults to `3000`, and the server refuses to start when it is not an unprivileged port, a whole number from 1024 to 65535.
 - The `HOST` environment variable, which sets the hostname or IP address the server listens on. It defaults to `0.0.0.0`, and the server refuses to start when it is not a valid hostname or IP address.
 - The server loads environment variables from a `.env.local` and a `.env` file in the working directory. A variable set in the process wins over both files.
+- The `Dockerfile`, which builds a production image for `linux/amd64` and `linux/arm64`. The image runs the server as the unprivileged `node` user on port `3000`, works on a read-only root filesystem, and probes `GET /health/ready` as its `HEALTHCHECK`.
 
 [Unreleased]: https://github.com/dnd-mapp/api-content/commits/main
