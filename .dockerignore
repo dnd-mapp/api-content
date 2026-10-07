@@ -1,0 +1,12 @@
+# Ignores everything and lets in only the files that the image is built from, so local files such as .env,
+# node_modules, and the Git history stay out of the build context.
+*
+
+!src/
+!.docker/healthcheck.js
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!nest-cli.json
+!.swcrc
+!tsconfig*.json

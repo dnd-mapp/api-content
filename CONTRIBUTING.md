@@ -6,7 +6,7 @@ Thank you for your interest in contributing to the D&D Mapp content API.
 
 Open an [issue](https://github.com/dnd-mapp/api-content/issues) to discuss any change beyond a typo fix before you send a pull request. This avoids work on changes that do not fit the goals of the project.
 
-The [docs](docs) folder explains the [architecture](docs/architecture.md), the [configuration](docs/configuration.md), [building and testing](docs/building-and-testing.md), and [releasing](docs/releasing.md). Read the architecture before you change the code.
+The [docs](docs) folder explains the [architecture](docs/architecture.md), the [configuration](docs/configuration.md), [building and testing](docs/building-and-testing.md), [Docker](docs/docker.md), and [releasing](docs/releasing.md). Read the architecture before you change the code.
 
 ## Development setup
 
@@ -22,7 +22,7 @@ Dependency versions live in the catalogs in `pnpm-workspace.yaml`, which uses `c
 
 Newly published releases are held back for three days through `minimumReleaseAge`. You may need to wait before you can bump to a very recent version.
 
-Install [actionlint](https://github.com/rhysd/actionlint) to lint the workflows locally, for example with `brew install actionlint`. CI runs the version that `.github/actions/ci/action.yaml` pins.
+Install [actionlint](https://github.com/rhysd/actionlint) to lint the workflows locally, for example with `brew install actionlint`. CI runs the version that `.github/actions/ci/action.yaml` pins. Install [Docker](https://docs.docker.com/get-started/get-docker/) to lint the `Dockerfile` and build the image locally.
 
 ## Git hooks
 

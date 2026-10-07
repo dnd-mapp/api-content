@@ -1,4 +1,22 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["github>dnd-mapp/config-renovate#v2.0.0"]
+    "extends": ["github>dnd-mapp/config-renovate#v2.0.0"],
+    "packageRules": [
+        {
+            "description": "Group the Node.js image of the Dockerfile with devEngines.runtime, so both move to the same version.",
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["node"],
+            "matchUpdateTypes": ["major", "minor", "patch"],
+            "groupName": "Node.js",
+            "groupSlug": "node"
+        },
+        {
+            "description": "Group the pnpm image of the Dockerfile with devEngines.packageManager, so both move to the same version.",
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["ghcr.io/pnpm/pnpm"],
+            "matchUpdateTypes": ["major", "minor", "patch"],
+            "groupName": "pnpm",
+            "groupSlug": "package-manager"
+        }
+    ]
 }

@@ -1,5 +1,5 @@
 name: CI checks
-description: Installs dependencies, checks formatting, lints workflows, Markdown, and code, type checks, builds, and tests
+description: Installs dependencies, checks formatting, lints workflows, the Dockerfile, Markdown, and code, type checks, builds, and tests
 
 runs:
     using: composite
@@ -20,6 +20,10 @@ runs:
           with:
               version: 1.7.12
               pyflakes: false
+
+        - name: Lint Dockerfile
+          shell: bash
+          run: pnpm run lint-docker
 
         - name: Lint Markdown
           shell: bash

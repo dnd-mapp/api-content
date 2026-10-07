@@ -22,6 +22,7 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                   |
 | `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                                       |
 | `tsconfig.tools.json`             | The tools project, for the config files in the repository root                        |
+| `.docker/healthcheck.js`          | The `HEALTHCHECK` of the Docker image, which requests the readiness endpoint          |
 
 ## Modules
 

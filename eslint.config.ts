@@ -1,6 +1,7 @@
 import javascript from '@dnd-mapp/config-eslint/javascript';
 import typescript from '@dnd-mapp/config-eslint/typescript';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
 
 export default defineConfig([
     globalIgnores(['dist/', '.coverage/', '.vitest/']),
@@ -17,6 +18,12 @@ export default defineConfig([
             '@typescript-eslint/explicit-member-accessibility': ['error', { overrides: { constructors: 'no-public' } }],
             '@typescript-eslint/parameter-properties': 'error',
             '@typescript-eslint/return-await': ['error', 'always'],
+        },
+    },
+    {
+        files: ['.docker/**/*.js'],
+        languageOptions: {
+            globals: globals.node,
         },
     },
 ]);
