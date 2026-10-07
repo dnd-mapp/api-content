@@ -46,7 +46,7 @@ jobs:
         needs: [ci, changes]
         if: needs.changes.outputs.docker == 'true'
         runs-on: ubuntu-26.04
-        timeout-minutes: 5
+        timeout-minutes: 10
         permissions:
             contents: read
         concurrency:
