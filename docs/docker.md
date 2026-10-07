@@ -49,6 +49,25 @@ The server listens on port `3000` by default, the same port as `pnpm run start`.
 
 The server stops gracefully on `SIGTERM`, which `docker stop` sends, so open requests finish first.
 
+## Docker Compose
+
+A Compose service takes the same settings as the `docker run` command above. It needs no `healthcheck` key, since it inherits the `HEALTHCHECK` of the image.
+
+```yaml
+services:
+    api-content:
+        image: dnd-mapp/api-content
+        ports:
+            - "3000:3000"
+        read_only: true
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
+```
+
+Start it with `docker compose up --detach`, and check its health with `docker compose ps`, which shows `healthy` once the server is ready. Set the [environment variables](configuration.md#environment-variables) under `environment`, and change the port mapping to match `PORT`. Another service that needs the API can wait for it with `depends_on` and `condition: service_healthy`.
+
 ## Health check
 
 The `HEALTHCHECK` of the image requests `GET /health/ready` on `127.0.0.1` and the port in `PORT`. Docker marks the container unhealthy after three failures in a row.
