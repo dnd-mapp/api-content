@@ -13,12 +13,10 @@ Install Node.js and pnpm in the versions that `devEngines` in `package.json` set
 pnpm install
 ```
 
-Start the server in watch mode, which recompiles and restarts it as you edit, or build it into `dist` and run the build.
+Start the server in watch mode, which recompiles and restarts it as you edit.
 
 ```bash
-pnpm run start-dev
-pnpm run build
-pnpm run start-prod
+pnpm run start
 ```
 
 The server listens on the port in the `PORT` environment variable, and on `3000` when it is unset. The server shuts down gracefully on `SIGTERM` and `SIGINT`, so an orchestrator can stop it without cutting off requests.

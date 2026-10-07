@@ -61,10 +61,10 @@
             "problemMatcher": []
         },
         {
-            "label": "start-dev",
+            "label": "start",
             "detail": "Starts the server in watch mode with the Nest CLI",
             "type": "shell",
-            "command": "pnpm run start-dev",
+            "command": "pnpm run start",
             "isBackground": true,
             "problemMatcher": []
         }
