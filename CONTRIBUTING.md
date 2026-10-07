@@ -74,7 +74,7 @@ The health endpoints have different jobs. The liveness probe tells the orchestra
 
 ## Building and testing
 
-The `build` script compiles the application with the Nest CLI into `dist`. [SWC](https://swc.rs/) transpiles the files, and `tsc` type checks them in parallel, so a type error fails the build without slowing the transpilation down. The `start` script compiles and runs it once, `start-dev` recompiles and restarts it as you edit, and `start-prod` runs the build in `dist`.
+The `build` script compiles the application with the Nest CLI into `dist`. [SWC](https://swc.rs/) transpiles the files, and `tsc` type checks them in parallel, so a type error fails the build without slowing the transpilation down. The `start` script compiles and runs it in watch mode, so it recompiles and restarts as you edit.
 
 Tests use Vitest. The specs in `src` test a class through a testing module from `@nestjs/testing` that imports the module of the class, so the module resolves the dependencies the same way it does in the application. An end-to-end suite will follow in a later change. Vitest reads `experimentalDecorators` and `emitDecoratorMetadata` from the TypeScript project, so the decorators of NestJS work without a plugin. Coverage must stay above the thresholds in `vitest.config.ts`.
 
