@@ -10,8 +10,8 @@ export default defineConfig({
         coverage: {
             enabled: true,
             // The entry point and the root module only wire the application together, which the end-to-end suite
-            // will cover once it exists.
-            exclude: ['src/main.ts', 'src/app.module.ts'],
+            // will cover once it exists. The barrel files only re-export what each module shares.
+            exclude: ['src/main.ts', 'src/app.module.ts', 'src/**/index.ts'],
             include: ['src/**/*.ts'],
             provider: 'v8',
             reporter: ['text-summary', 'html'],
