@@ -38,13 +38,15 @@ runs:
           env:
               DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
 
+        # Builds from the checkout of the job rather than from the Git context of the event.
         - name: Build and push the image
           uses: docker/bake-action@018cb6412ab401ebaa809aa5f85966b74628600f # v7.4.0
           with:
+              source: .
               files: |
                   ./docker-bake.hcl
-                  cwd://${{ steps.meta.outputs.bake-file-tags }}
-                  cwd://${{ steps.meta.outputs.bake-file-labels }}
-                  cwd://${{ steps.meta.outputs.bake-file-annotations }}
+                  ${{ steps.meta.outputs.bake-file-tags }}
+                  ${{ steps.meta.outputs.bake-file-labels }}
+                  ${{ steps.meta.outputs.bake-file-annotations }}
               targets: ci
               push: true
