@@ -1,0 +1,1 @@
+The D&D Mapp content API: races, classes, items, spells, and the rules of the game.
