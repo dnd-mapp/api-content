@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@nestjs/common": "catalog:nestjs",
+    "@nestjs/config": "catalog:nestjs",
     "@nestjs/core": "catalog:nestjs",
     "@nestjs/platform-fastify": "catalog:nestjs",
     "@nestjs/terminus": "catalog:nestjs",

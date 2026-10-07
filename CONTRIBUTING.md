@@ -37,19 +37,22 @@ The pre-commit hooks only check files. Run `pnpm run format` to fix formatting i
 
 The repository is a NestJS workspace with a single application. The Nest CLI reads `nest-cli.json` to find the sources, the entry file, and the TypeScript project it compiles with.
 
-| File                              | Purpose                                                                      |
-|:----------------------------------|:-----------------------------------------------------------------------------|
-| `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the port |
-| `src/app.module.ts`               | The root module, which imports the feature modules                           |
-| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller       |
-| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias           |
-| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                             |
-| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                |
-| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                   |
-| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on      |
-| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads          |
-| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                              |
-| `tsconfig.tools.json`             | The tools project, for the config files in the repository root               |
+| File                              | Purpose                                                                               |
+|:----------------------------------|:--------------------------------------------------------------------------------------|
+| `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the host and port |
+| `src/app.module.ts`               | The root module, which loads the configuration and imports the feature modules        |
+| `src/config/environment.ts`       | The environment variables and the function that validates them                        |
+| `src/config/index.ts`             | The public entry of the configuration, behind the `@/config` alias                    |
+| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller                |
+| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias                    |
+| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                                      |
+| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                         |
+| `.env.example`                    | The environment variables, to copy into a `.env` or `.env.local` file                 |
+| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                            |
+| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on               |
+| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                   |
+| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                                       |
+| `tsconfig.tools.json`             | The tools project, for the config files in the repository root                        |
 
 Import local files without an extension. SWC appends `.js` in the build because `resolveFully` is on, and `tsc` and Vitest resolve the import through the `bundler` module resolution.
 
@@ -68,7 +71,9 @@ The schematics write `.js` import extensions and a Jest-style spec. Drop the ext
 
 NestJS resolves the dependencies of a class from the types of its constructor parameters, so import a class that you inject as a value import, not as a type import. Declare a field for each dependency and assign it in the constructor, rather than using a parameter property, so the fields of a class are all declared in one place. Mark every member of a class `public`, `protected`, or `private`, except the constructor. Return a promise from an `async` method with `return await`, so the method itself appears in the stack trace of a rejection. ESLint enforces all three. Mark every other import that is only used as a type with `import type`, which `verbatimModuleSyntax` requires.
 
-Only `src/main.ts` touches the process: it reads `PORT`, listens, and enables the shutdown hooks. Keep the modules, controllers, and providers free of that, so the specs can create the application through `@nestjs/testing` without side effects.
+Only `src/main.ts` and the `ConfigModule` in `src/app.module.ts` touch the process. `ConfigModule` loads the `.env` files and validates the environment variables, and `src/main.ts` listens and enables the shutdown hooks. Keep the feature modules, controllers, and providers free of that, so the specs can create them through `@nestjs/testing` without side effects.
+
+Read configuration through the `ConfigService` of `@nestjs/config`, never through `process.env`. Type it as `ConfigService<Environment, true>` and pass `{ infer: true }` to `get`, so the value has the type that `Environment` gives it. To add an environment variable, add it to `Environment` in `src/config/environment.ts`, parse and validate it in `validateEnvironment`, and document it in `.env.example`, the README, and the changelog.
 
 The health endpoints have different jobs. The liveness probe tells the orchestrator whether to restart the container, so it checks nothing but the process itself. The readiness probe tells the orchestrator whether to route traffic to the container, so a check for every dependency the application needs to serve a request belongs there, as a [Terminus health indicator](https://docs.nestjs.com/recipes/terminus).
 

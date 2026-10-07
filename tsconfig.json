@@ -11,6 +11,7 @@
         "composite": true,
         "noEmit": true,
         "paths": {
+            "@/config": ["./src/config/index.ts"],
             "@/health": ["./src/health/index.ts"]
         },
         "verbatimModuleSyntax": true
