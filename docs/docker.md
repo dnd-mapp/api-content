@@ -35,7 +35,7 @@ Build it for both platforms with Buildx. Docker can only load a multi-platform i
 docker buildx build --platform linux/amd64,linux/arm64 --tag dnd-mapp/api-content .
 ```
 
-The `Dockerfile` starts with `# check=error=true`, so a violation of the [build checks](https://docs.docker.com/build/checks/) fails the build.
+The `Dockerfile` starts with `# check=error=true`, so a violation of the [build checks](https://docs.docker.com/build/checks/) fails the build. Run the checks alone with `pnpm run lint-docker`, which CI runs too.
 
 ## Running
 

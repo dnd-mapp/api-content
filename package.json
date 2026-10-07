@@ -23,6 +23,7 @@
     "typecheck": "tsc -b",
     "lint-ts": "eslint",
     "lint-md": "markdownlint-cli2",
+    "lint-docker": "docker build --check .",
     "format": "prettier -w .",
     "format-check": "prettier -c ."
   },

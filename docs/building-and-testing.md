@@ -10,12 +10,13 @@ Tests use Vitest. The specs in `src` test a class through a testing module from 
 
 ## Checks
 
-Check and format the repository with these commands. CI runs `format-check`, actionlint, `lint-md`, `lint-ts`, `typecheck`, `build`, and `test-ci`, in that order. Run them yourself before you open a pull request.
+Check and format the repository with these commands. CI runs `format-check`, actionlint, `lint-docker`, `lint-md`, `lint-ts`, `typecheck`, `build`, and `test-ci`, in that order. Run them yourself before you open a pull request.
 
 ```bash
 pnpm run format-check
 pnpm run format
 actionlint
+pnpm run lint-docker
 pnpm run lint-md
 pnpm run lint-ts
 pnpm run typecheck
@@ -23,4 +24,4 @@ pnpm run build
 pnpm run test-ci
 ```
 
-The `lint-md` script lints the Markdown files with markdownlint, and the `lint-ts` script lints the code with ESLint. The `typecheck` script checks the three TypeScript projects with `tsc -b`. Use `pnpm test` to run the tests in watch mode with the Vitest UI.
+The `lint-docker` script runs the [build checks](https://docs.docker.com/build/checks/) of Docker on the `Dockerfile`, which needs a running Docker daemon. The `lint-md` script lints the Markdown files with markdownlint, and the `lint-ts` script lints the code with ESLint. The `typecheck` script checks the three TypeScript projects with `tsc -b`. Use `pnpm test` to run the tests in watch mode with the Vitest UI.
