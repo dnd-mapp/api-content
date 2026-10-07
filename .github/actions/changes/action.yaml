@@ -1,5 +1,5 @@
-name: Image changes
-description: Detects whether the event changes a file that goes into the image or into the pipeline that builds it
+name: Changes
+description: Detects whether the event changes the image or the pipeline that builds it, and the Docker Hub description
 
 inputs:
     workflow:
@@ -7,9 +7,12 @@ inputs:
         required: true
 
 outputs:
-    docker:
+    image:
         description: Whether the event changes the image, as `true` or `false`
-        value: ${{ steps.filter.outputs.docker }}
+        value: ${{ steps.filter.outputs.image }}
+    description:
+        description: Whether the event changes the Docker Hub description, as `true` or `false`
+        value: ${{ steps.filter.outputs.description }}
 
 runs:
     using: composite
@@ -17,14 +20,14 @@ runs:
         # A pull request compares with its base through the GitHub API and ignores `base`, so once it touches the image,
         # every later push rebuilds pr-<N>. A push to main compares with the previous push, which for a merge commit
         # covers the whole pull request.
-        - name: Detect changes to the image
+        - name: Detect changes
           id: filter
           uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
           with:
               base: main
               predicate-quantifier: some-with-excludes
               filters: |
-                  docker:
+                  image:
                       - src/**
                       - "!src/**/*.spec.ts"
                       - .docker/healthcheck.js
@@ -38,5 +41,8 @@ runs:
                       - .dockerignore
                       - docker-bake.hcl
                       - .github/actions/docker/**
-                      - .github/actions/image-changes/**
+                      - .github/actions/changes/**
                       - ${{ inputs.workflow }}
+                  description:
+                      - .docker/README.md
+                      - .docker/short-description.txt

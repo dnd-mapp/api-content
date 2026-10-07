@@ -29,14 +29,15 @@ jobs:
         permissions:
             contents: read
         outputs:
-            docker: ${{ steps.changes.outputs.docker }}
+            image: ${{ steps.changes.outputs.image }}
+            description: ${{ steps.changes.outputs.description }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - name: Detect changes to the image
+            - name: Detect changes
               id: changes
-              uses: ./.github/actions/image-changes
+              uses: ./.github/actions/changes
               with:
                   workflow: .github/workflows/push-main.yaml
 
@@ -44,7 +45,7 @@ jobs:
     docker:
         name: Docker
         needs: [ci, changes]
-        if: needs.changes.outputs.docker == 'true'
+        if: needs.changes.outputs.image == 'true'
         runs-on: ubuntu-26.04
         timeout-minutes: 10
         permissions:
@@ -61,6 +62,39 @@ jobs:
               with:
                   username: ${{ vars.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
+
+    # Skips CI: the CI job of the pull request runs the same checks, and the ruleset requires the branch to be up to
+    # date before it merges, so the description on main has already passed them.
+    docker-hub-description:
+        name: Docker Hub description
+        needs: changes
+        if: needs.changes.outputs.description == 'true'
+        runs-on: ubuntu-26.04
+        timeout-minutes: 2
+        permissions:
+            contents: read
+        concurrency:
+            group: ${{ github.workflow }}-${{ github.job }}
+            cancel-in-progress: true
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            # $(< file) drops the final newline that .editorconfig adds.
+            - name: Read the short description
+              id: short-description
+              shell: bash
+              run: echo "text=$(< .docker/short-description.txt)" >> "$GITHUB_OUTPUT"
+
+            # Updating a description needs the delete scope, and Docker Hub answers 403 Forbidden to a read,write token.
+            - name: Update the Docker Hub description
+              uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
+              with:
+                  username: ${{ vars.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN_DELETE }}
+                  repository: ${{ vars.DOCKERHUB_USERNAME }}/api-content
+                  short-description: ${{ steps.short-description.outputs.text }}
+                  readme-filepath: .docker/README.md
 
     tag:
         name: Tag release
