@@ -41,7 +41,7 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 |:----------------------------------|:--------------------------------------------------------------------------------------|
 | `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the host and port |
 | `src/app.module.ts`               | The root module, which loads the configuration and imports the feature modules        |
-| `src/config/environment.ts`       | The environment variables and the function that validates them                        |
+| `src/config/environment.ts`       | The Zod schema that validates the environment variables                               |
 | `src/config/index.ts`             | The public entry of the configuration, behind the `@/config` alias                    |
 | `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller                |
 | `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias                    |
@@ -73,7 +73,7 @@ NestJS resolves the dependencies of a class from the types of its constructor pa
 
 Only `src/main.ts` and the `ConfigModule` in `src/app.module.ts` touch the process. `ConfigModule` loads the `.env` files and validates the environment variables, and `src/main.ts` listens and enables the shutdown hooks. Keep the feature modules, controllers, and providers free of that, so the specs can create them through `@nestjs/testing` without side effects.
 
-Read configuration through the `ConfigService` of `@nestjs/config`, never through `process.env`. Type it as `ConfigService<Environment, true>` and pass `{ infer: true }` to `get`, so the value has the type that `Environment` gives it. To add an environment variable, add it to `Environment` in `src/config/environment.ts`, parse and validate it in `validateEnvironment`, and document it in `.env.example`, the README, and the changelog.
+Read configuration through the `ConfigService` of `@nestjs/config`, never through `process.env`. Type it as `ConfigService<Environment, true>` and pass `{ infer: true }` to `get`, so the value has the type that `Environment` gives it. `ConfigModule` validates the environment variables against the [Zod](https://zod.dev/) schema `environmentSchema` in `src/config/environment.ts`, and `Environment` is inferred from it. To add an environment variable, add it to the schema with its type, default, and constraints, and document it in `.env.example`, the README, and the changelog. Give each constraint an error that names what the value must be and the value it got, since `ConfigModule` puts the name of the variable in front of it. Zod's `default()` only covers a variable that is unset, so wrap the schema of an optional variable in `z.preprocess(emptyAsUnset, ...)` to treat an empty one the same way.
 
 The health endpoints have different jobs. The liveness probe tells the orchestrator whether to restart the container, so it checks nothing but the process itself. The readiness probe tells the orchestrator whether to route traffic to the container, so a check for every dependency the application needs to serve a request belongs there, as a [Terminus health indicator](https://docs.nestjs.com/recipes/terminus).
 

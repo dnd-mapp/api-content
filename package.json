@@ -48,7 +48,8 @@
     "@nestjs/platform-fastify": "catalog:nestjs",
     "@nestjs/terminus": "catalog:nestjs",
     "reflect-metadata": "catalog:nestjs",
-    "rxjs": "catalog:nestjs"
+    "rxjs": "catalog:nestjs",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@commitlint/cli": "catalog:commitlint",
