@@ -69,6 +69,7 @@
     "@vitest/coverage-v8": "catalog:vitest",
     "@vitest/ui": "catalog:vitest",
     "eslint": "catalog:eslint",
+    "globals": "catalog:eslint",
     "lefthook": "catalog:commitlint",
     "markdownlint-cli2": "catalog:markdown",
     "prettier": "catalog:prettier",

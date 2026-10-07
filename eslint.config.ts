@@ -1,6 +1,7 @@
 import javascript from '@dnd-mapp/config-eslint/javascript';
 import typescript from '@dnd-mapp/config-eslint/typescript';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
 
 export default defineConfig([
     globalIgnores(['dist/', '.coverage/', '.vitest/']),
@@ -22,10 +23,7 @@ export default defineConfig([
     {
         files: ['.docker/**/*.js'],
         languageOptions: {
-            globals: {
-                fetch: 'readonly',
-                process: 'readonly',
-            },
+            globals: globals.node,
         },
     },
 ]);
