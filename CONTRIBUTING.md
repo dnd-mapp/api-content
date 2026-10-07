@@ -6,6 +6,8 @@ Thank you for your interest in contributing to the D&D Mapp content API.
 
 Open an [issue](https://github.com/dnd-mapp/api-content/issues) to discuss any change beyond a typo fix before you send a pull request. This avoids work on changes that do not fit the goals of the project.
 
+The [docs](docs) folder explains the [architecture](docs/architecture.md), the [configuration](docs/configuration.md), [building and testing](docs/building-and-testing.md), and [releasing](docs/releasing.md). Read the architecture before you change the code.
+
 ## Development setup
 
 The required Node and pnpm versions are set in `devEngines` in `package.json`. They are enforced through `engineStrict`, so installing with other versions fails.
@@ -92,7 +94,7 @@ Write the description in the imperative mood, such as "add the readiness probe".
 - Keep each pull request to one change.
 - Link the issue it addresses.
 - Run the [checks](docs/building-and-testing.md#checks) before you open it.
-- Update the changelog and README in the same pull request.
+- Update the changelog and the docs in the same pull request.
 - Use a title that follows the commit convention.
 - If you have write access, turn on auto-merge once the pull request is open, with `gh pr merge <number> --auto --merge` or the "Enable auto-merge" button. It then merges as soon as it is approved and the checks pass.
 - If auto-merge is off, the author merges the pull request once it is approved and the checks pass. A maintainer merges pull requests opened by a contributor without write access.

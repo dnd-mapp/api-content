@@ -25,9 +25,16 @@ The server shuts down gracefully on `SIGTERM` and `SIGINT`, so an orchestrator c
 
 The server reads its configuration from environment variables, which it also loads from a `.env.local` and a `.env` file. [Configuration](docs/configuration.md) lists every variable with its default.
 
+## Documentation
+
+- [Architecture](docs/architecture.md): the project layout, the modules, and the health probes.
+- [Configuration](docs/configuration.md): the environment variables and the configuration namespaces.
+- [Building and testing](docs/building-and-testing.md): the build, the tests, and the checks that CI runs.
+- [Releasing](docs/releasing.md): the steps to publish a release.
+
 ## Contributing
 
-Contributions are welcome. See the [contributing guide](CONTRIBUTING.md) for the project layout, the checks, the release steps, and the commit conventions.
+Contributions are welcome. See the [contributing guide](CONTRIBUTING.md) for the setup, the code style, and the branch, commit, and pull request conventions.
 
 ## License
 
