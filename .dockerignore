@@ -3,6 +3,7 @@
 *
 
 !src/
+!.docker/healthcheck.js
 !package.json
 !pnpm-lock.yaml
 !pnpm-workspace.yaml

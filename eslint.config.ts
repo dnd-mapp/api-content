@@ -19,4 +19,13 @@ export default defineConfig([
             '@typescript-eslint/return-await': ['error', 'always'],
         },
     },
+    {
+        files: ['.docker/**/*.js'],
+        languageOptions: {
+            globals: {
+                fetch: 'readonly',
+                process: 'readonly',
+            },
+        },
+    },
 ]);

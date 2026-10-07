@@ -6,18 +6,18 @@ The `Dockerfile` builds a production image of the server for `linux/amd64` and `
 
 The `Dockerfile` has four stages.
 
-| Stage          | Platform  | Purpose                                                                         |
-|:---------------|:----------|:--------------------------------------------------------------------------------|
-| `pnpm`         | Builder   | The official image of the standalone pnpm binary, which the other stages copy   |
-| `dependencies` | Builder   | Installs the production dependencies with `pnpm install --prod`                 |
-| `build`        | Builder   | Installs every dependency and compiles the application into `dist`              |
-| `runtime`      | Target    | Copies `package.json`, the production dependencies, and `dist` into a new image |
+| Stage          | Platform | Purpose                                                                                                  |
+|:---------------|:---------|:---------------------------------------------------------------------------------------------------------|
+| `pnpm`         | Builder  | The official image of the standalone pnpm binary, which the other stages copy                            |
+| `dependencies` | Builder  | Installs the production dependencies with `pnpm install --prod`                                          |
+| `build`        | Builder  | Installs every dependency and compiles the application into `dist`                                       |
+| `runtime`      | Target   | Copies `package.json`, the production dependencies, `dist`, and the health check script into a new image |
 
 The install and build stages run on the platform of the builder, and the final stage only copies files. A multi-platform build therefore installs and compiles once, and needs no emulation. Every base image is pinned by tag and digest, and Renovate keeps the digests current. It moves the Node.js and pnpm images in the same pull request as `devEngines` in `package.json`.
 
 The image runs `node --enable-source-maps dist/main.js` from `/app` as the unprivileged `node` user, with `NODE_ENV=production`. The files belong to root, so the server can read them but not change them. The source maps ship with the image, so a stack trace points to the TypeScript sources.
 
-The `.dockerignore` file lets only the sources, the package manifest, the lockfile, and the compiler configs into the build context. Add a file there when the build needs it.
+The `.dockerignore` file lets only the sources, the health check script, the package manifest, the lockfile, and the compiler configs into the build context. Add a file there when the build needs it.
 
 The production dependencies are installed for the builder and copied as they are. That works because none of them holds native code. A future dependency with native code must be installed for `$TARGETPLATFORM` instead, for example in a stage that runs on the target platform.
 
@@ -70,7 +70,9 @@ Start it with `docker compose up --detach`, and check its health with `docker co
 
 ## Health check
 
-The `HEALTHCHECK` of the image requests `GET /health/ready` on `127.0.0.1` and the port in `PORT`. Docker marks the container unhealthy after three failures in a row.
+The `HEALTHCHECK` of the image runs `.docker/healthcheck.js`, which requests `GET /health/ready` on `127.0.0.1` and the port in `PORT`. The script exits with `0` when the server answers with a success status, and with `1` otherwise. Docker marks the container unhealthy after three failures in a row.
+
+The script reads `PORT` from `process.env` directly, an exception to the rule in [Configuration](configuration.md#namespaces), since the `server` namespace would load NestJS and Zod on every check. Like the namespace, it falls back to `3000` when `PORT` is unset or empty.
 
 | Option             | Value | Meaning                                                    |
 |:-------------------|------:|:-----------------------------------------------------------|

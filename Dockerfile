@@ -37,12 +37,14 @@ WORKDIR /app
 COPY package.json ./
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+COPY .docker/healthcheck.js ./
 USER 1000:1000
 EXPOSE 3000
 
-# Docker marks the container unhealthy once the readiness endpoint fails three times in a row. It probes every second
-# during the start period, so the container turns healthy as soon as the server is ready.
+# Runs .docker/healthcheck.js, which requests the readiness endpoint. Docker marks the container unhealthy once it fails
+# three times in a row. It probes every second during the start period, so the container turns healthy as soon as the
+# server is ready.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --start-interval=1s --retries=3 \
-    CMD ["node", "-e", "fetch('http://127.0.0.1:' + (process.env.PORT ?? 3000) + '/health/ready').then((response) => process.exit(response.ok ? 0 : 1), () => process.exit(1))"]
+    CMD ["node", "healthcheck.js"]
 
 CMD ["node", "--enable-source-maps", "dist/main.js"]
