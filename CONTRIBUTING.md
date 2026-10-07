@@ -37,19 +37,19 @@ The pre-commit hooks only check files. Run `pnpm run format` to fix formatting i
 
 The repository is a NestJS workspace with a single application. The Nest CLI reads `nest-cli.json` to find the sources, the entry file, and the TypeScript project it compiles with.
 
-| File                              | Purpose                                                                      |
-|:----------------------------------|:-----------------------------------------------------------------------------|
-| `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the port |
-| `src/app.module.ts`               | The root module, which imports the feature modules                           |
-| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller       |
-| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias           |
-| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                             |
-| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                |
-| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                   |
-| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on      |
-| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads          |
-| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                              |
-| `tsconfig.tools.json`             | The tools project, for the config files in the repository root               |
+| File                              | Purpose                                                                               |
+|:----------------------------------|:--------------------------------------------------------------------------------------|
+| `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the host and port |
+| `src/app.module.ts`               | The root module, which imports the feature modules                                    |
+| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller                |
+| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias                    |
+| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                                      |
+| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                         |
+| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                            |
+| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on               |
+| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                   |
+| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                                       |
+| `tsconfig.tools.json`             | The tools project, for the config files in the repository root                        |
 
 Import local files without an extension. SWC appends `.js` in the build because `resolveFully` is on, and `tsc` and Vitest resolve the import through the `bundler` module resolution.
 

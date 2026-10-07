@@ -11,8 +11,7 @@ async function bootstrap() {
     // Closes the application on SIGTERM, so a container orchestrator can stop it gracefully.
     app.enableShutdownHooks();
 
-    // Fastify only listens on localhost by default, which a container cannot be reached on.
-    await app.listen(configService.get('PORT', { infer: true }), '0.0.0.0');
+    await app.listen(configService.get('PORT', { infer: true }), configService.get('HOST', { infer: true }));
 }
 
 await bootstrap();

@@ -25,9 +25,10 @@ The server shuts down gracefully on `SIGTERM` and `SIGINT`, so an orchestrator c
 
 The server reads its configuration from environment variables. It also loads them from a `.env.local` and a `.env` file in the working directory, when those exist. A variable set in the process wins over both files, and `.env.local` wins over `.env`. Copy `.env.example` to start a file of your own; Git ignores both files.
 
-| Variable | Default | Purpose                                                                 |
-|:---------|--------:|:------------------------------------------------------------------------|
-| `PORT`   |  `3000` | The port the server listens on, an unprivileged port from 1024 to 65535 |
+| Variable |   Default | Purpose                                                                                 |
+|:---------|----------:|:----------------------------------------------------------------------------------------|
+| `HOST`   | `0.0.0.0` | The hostname or IP address the server listens on, where `0.0.0.0` is every IPv4 address |
+| `PORT`   |    `3000` | The port the server listens on, an unprivileged port from 1024 to 65535                 |
 
 The server validates the variables on startup, and refuses to start when one holds an invalid value.
 

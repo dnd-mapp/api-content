@@ -1,6 +1,25 @@
 import { validateEnvironment } from './environment';
 
 describe('validateEnvironment', () => {
+    it('defaults the host to 0.0.0.0 when HOST is unset', () => {
+        expect(validateEnvironment({}).HOST).toBe('0.0.0.0');
+    });
+
+    it('defaults the host to 0.0.0.0 when HOST is empty', () => {
+        expect(validateEnvironment({ HOST: '' }).HOST).toBe('0.0.0.0');
+    });
+
+    it.each(['127.0.0.1', '::', '::1', 'localhost', 'api.dndmapp.test'])('accepts "%s" as HOST', (host) => {
+        expect(validateEnvironment({ HOST: host }).HOST).toBe(host);
+    });
+
+    it.each(['local host', '-localhost', 'localhost-', 'api..test', 'http://localhost', '[::1]', 'a'.repeat(64)])(
+        'rejects "%s" as HOST',
+        (host) => {
+            expect(() => validateEnvironment({ HOST: host })).toThrow('HOST must be a hostname or an IP address');
+        },
+    );
+
     it('defaults the port to 3000 when PORT is unset', () => {
         expect(validateEnvironment({}).PORT).toBe(3000);
     });
