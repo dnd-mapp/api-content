@@ -17,7 +17,7 @@ The install and build stages run on the platform of the builder, and the final s
 
 The image runs `node --enable-source-maps dist/main.js` from `/app` as the unprivileged `node` user, with `NODE_ENV=production`. The files belong to root, so the server can read them but not change them. The source maps ship with the image, so a stack trace points to the TypeScript sources.
 
-The `.dockerignore` file lets only the sources, the health check script, the package manifest, the lockfile, and the compiler configs into the build context. Add a file there when the build needs it, and to the [path filters](#path-filter) of the workflows.
+The `.dockerignore` file lets only the sources, the health check script, the package manifest, the lockfile, and the compiler configs into the build context. Add a file there when the build needs it, and to the [path filter](#path-filter).
 
 The production dependencies are installed for the builder and copied as they are. That works because none of them holds native code. A future dependency with native code must be installed for `$TARGETPLATFORM` instead, which needs emulation or a runner for each platform.
 
@@ -25,13 +25,13 @@ Keep the `runtime` stage free of `RUN` instructions. CI builds both platforms on
 
 ## Building
 
-The Bake file, `docker-bake.hcl`, defines the build that CI runs: both platforms, an SBOM, and a provenance attestation. Run the same build locally:
+The Bake file, `docker-bake.hcl`, defines two targets. The `default` target builds both platforms with an SBOM and a provenance attestation. The `ci` target inherits from it and adds the GitHub Actions cache for the layers, which needs the runtime token of a workflow run. CI builds `ci`, and a local build runs `default`:
 
 ```bash
 docker buildx bake
 ```
 
-It tags the image `dndmapp/api-content:local`. Docker can only load a multi-platform image when it uses the containerd image store, which new installs of Docker Desktop turn on by default. Inside GitHub Actions, the build also reads and writes its layer cache in the GitHub Actions cache. Bake skips the cache elsewhere, since it needs the runtime token of a workflow run.
+It tags the image `dndmapp/api-content:local`. Docker can only load a multi-platform image when it uses the containerd image store, which new installs of Docker Desktop turn on by default.
 
 Build the image for the platform of your machine alone:
 
@@ -43,7 +43,7 @@ The `Dockerfile` starts with `# check=error=true`, so a violation of the [build 
 
 ## Publishing
 
-The composite action in `.github/actions/docker` sets up Buildx, logs in to Docker Hub, and runs Bake. Before the build, `docker/metadata-action` generates the tags of the event, the OCI labels, and the annotations of the image manifests and the index. The `Dockerfile` sets no labels of its own for this reason.
+The composite action in `.github/actions/docker` sets up Buildx, logs in to Docker Hub, and builds the `ci` target with Bake from the checkout of the job. Before the build, `docker/metadata-action` generates the tags of the event, the OCI labels, and the annotations of the image manifests and the index. The `Dockerfile` sets no labels of its own for this reason.
 
 ### Tags
 
@@ -63,13 +63,13 @@ On `main`, the `docker` job waits for CI, so `edge` only moves to a commit that 
 
 ### Path filter
 
-On pull requests and on `main`, a `changes` job runs [`dorny/paths-filter`](https://github.com/dorny/paths-filter) first, and the image job only runs when the change touches one of these paths. Changes to the docs alone build no image. Releases build without the filter.
+On pull requests and on `main`, a `changes` job runs the composite action in `.github/actions/image-changes` first. The action runs [`dorny/paths-filter`](https://github.com/dorny/paths-filter), and the image job only runs when the change touches one of these paths. Changes to the docs alone build no image. Releases build without the filter.
 
 - The files that `.dockerignore` lets in, without the specs under `src`, which never reach `dist`.
 - The `Dockerfile`, `.dockerignore`, and `docker-bake.hcl`.
-- The composite action in `.github/actions/docker` and the workflow that runs the job, so a change to the pipeline tests itself.
+- The composite actions in `.github/actions/docker` and `.github/actions/image-changes`, and the workflow that runs the job, so a change to the pipeline tests itself.
 
-A pull request compares with its base, so once it touches the image, every later push rebuilds `pr-<N>`. `main` compares each push with the previous one, which for a merge commit covers the whole pull request. When a merge leaves the image alone, `edge` keeps pointing at the last build, and that commit gets no `sha-<short-sha>` tag. The filter lives in both `pull-request.yaml` and `push-main.yaml`, so change it in both.
+A pull request compares with its base, so once it touches the image, every later push rebuilds `pr-<N>`. `main` compares each push with the previous one, which for a merge commit covers the whole pull request. When a merge leaves the image alone, `edge` keeps pointing at the last build, and that commit gets no `sha-<short-sha>` tag. Each workflow passes its own path to the action, so add a new path to the filter in the action alone.
 
 ### Credentials
 
