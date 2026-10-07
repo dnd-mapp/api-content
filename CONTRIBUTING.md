@@ -39,11 +39,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 A removed or renamed endpoint, a changed response, and a changed environment variable are breaking changes. Say so in the changelog entry.
 
-## Releasing
-
-1. Run the [prepare release workflow](.github/workflows/prepare-release.yaml) on `main` with the part of the version to bump, for example `gh workflow run prepare-release.yaml -f bump=minor`. It opens the `chore: release X.Y.Z` pull request with auto-merge on.
-2. Review and approve the pull request. Once it merges, the `tag` job of the [push workflow](.github/workflows/push-main.yaml) creates the annotated tag `vX.Y.Z` on the merge commit.
-3. The [release workflow](.github/workflows/release.yaml) runs the CI checks, verifies the tag and the changelog, and creates the GitHub Release.
+A maintainer ships the recorded changes as described in [Releasing](docs/releasing.md).
 
 ## Code style
 
