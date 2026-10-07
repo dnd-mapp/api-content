@@ -1,0 +1,57 @@
+name: Pull request closed
+
+on:
+    pull_request:
+        types:
+            - closed
+
+permissions: {}
+
+jobs:
+    remove-image-tag:
+        name: Remove image tag
+        # A pull request from a fork gets no secrets, and its Docker job pushed no image.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-26.04
+        timeout-minutes: 2
+        permissions: {}
+        # Shares its group with the Docker job in pull-request.yaml and cancels a build that is still running, so it
+        # cannot push pr-<N> again after the tag is gone.
+        concurrency:
+            group: docker-pr-${{ github.event.pull_request.number }}
+            cancel-in-progress: true
+        steps:
+            # The documented Docker Hub API has no endpoint to delete a tag, so this calls the one that Docker Hub
+            # itself uses. A 404 means that the tag is already gone, or that the pull request never built an image.
+            - name: Delete the pr-${{ github.event.pull_request.number }} tag
+              shell: bash
+              run: |
+                  access_token=$(
+                      jq --null-input --arg identifier "$DOCKERHUB_USERNAME" --arg secret "$DOCKERHUB_TOKEN" \
+                          '{identifier: $identifier, secret: $secret}' |
+                          curl --fail-with-body --silent --show-error --request POST \
+                              --header "Content-Type: application/json" --data @- \
+                              https://hub.docker.com/v2/auth/token |
+                          jq --raw-output .access_token
+                  )
+                  echo "::add-mask::$access_token"
+
+                  status=$(
+                      curl --silent --show-error --output response.json --write-out "%{http_code}" --request DELETE \
+                          --header "Authorization: Bearer $access_token" \
+                          "https://hub.docker.com/v2/repositories/$DOCKERHUB_USERNAME/api-content/tags/pr-$PR_NUMBER/"
+                  )
+
+                  case "$status" in
+                      2??) echo "Deleted the tag pr-$PR_NUMBER." ;;
+                      404) echo "The tag pr-$PR_NUMBER does not exist." ;;
+                      *)
+                          echo "::error::Docker Hub answered $status when deleting the tag pr-$PR_NUMBER."
+                          cat response.json
+                          exit 1
+                          ;;
+                  esac
+              env:
+                  DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+                  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN_DELETE }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}

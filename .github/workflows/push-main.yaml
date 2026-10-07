@@ -22,6 +22,46 @@ jobs:
             - name: Run CI checks
               uses: ./.github/actions/ci
 
+    changes:
+        name: Detect changes
+        runs-on: ubuntu-26.04
+        timeout-minutes: 2
+        permissions:
+            contents: read
+        outputs:
+            docker: ${{ steps.changes.outputs.docker }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Detect changes to the image
+              id: changes
+              uses: ./.github/actions/image-changes
+              with:
+                  workflow: .github/workflows/push-main.yaml
+
+    # Waits for CI, so edge only moves to a commit that passed.
+    docker:
+        name: Docker
+        needs: [ci, changes]
+        if: needs.changes.outputs.docker == 'true'
+        runs-on: ubuntu-26.04
+        timeout-minutes: 5
+        permissions:
+            contents: read
+        concurrency:
+            group: ${{ github.workflow }}-${{ github.job }}
+            cancel-in-progress: false
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Build and push the image
+              uses: ./.github/actions/docker
+              with:
+                  username: ${{ vars.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
+
     tag:
         name: Tag release
         runs-on: ubuntu-26.04

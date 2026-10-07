@@ -28,3 +28,46 @@ jobs:
               env:
                   BASE_SHA: ${{ github.event.pull_request.base.sha }}
                   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+    changes:
+        name: Detect changes
+        runs-on: ubuntu-26.04
+        timeout-minutes: 2
+        permissions:
+            contents: read
+            pull-requests: read
+        outputs:
+            docker: ${{ steps.changes.outputs.docker }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Detect changes to the image
+              id: changes
+              uses: ./.github/actions/image-changes
+              with:
+                  workflow: .github/workflows/pull-request.yaml
+
+    docker:
+        name: Docker
+        needs: changes
+        # A pull request from a fork gets no secrets, so it cannot push an image.
+        if: needs.changes.outputs.docker == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-26.04
+        timeout-minutes: 5
+        permissions:
+            contents: read
+        # Shares its group with the cleanup in pull-request-closed.yaml, which cancels a build that would push pr-<N>
+        # again after the pull request closes.
+        concurrency:
+            group: docker-pr-${{ github.event.pull_request.number }}
+            cancel-in-progress: true
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Build and push the image
+              uses: ./.github/actions/docker
+              with:
+                  username: ${{ vars.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
