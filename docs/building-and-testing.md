@@ -2,7 +2,7 @@
 
 ## Building
 
-The `build` script compiles the application with the Nest CLI into `dist`. [SWC](https://swc.rs/) transpiles the files, and `tsc` type checks them in parallel, so a type error fails the build without slowing the transpilation down. The `start` script compiles and runs it in watch mode, so it recompiles and restarts as you edit. [Docker](docker.md) explains how to build and run the image.
+The `build` script compiles the application with the Nest CLI into `dist`. [SWC](https://swc.rs/) transpiles the files, and `tsc` type checks them in parallel, so a type error fails the build without slowing the transpilation down. The `start` script compiles and runs it in watch mode, so it recompiles and restarts as you edit. [Docker](docker.md) explains how to build the image, and the [image README](../.docker/README.md) how to run it.
 
 ## Testing
 
@@ -10,7 +10,7 @@ Tests use Vitest. The specs in `src` test a class through a testing module from 
 
 ## Checks
 
-Check and format the repository with these commands. CI runs `format-check`, actionlint, `lint-docker`, `lint-md`, `lint-ts`, `typecheck`, `build`, and `test-ci`, in that order. Run them yourself before you open a pull request.
+Check and format the repository with these commands. CI runs `format-check`, actionlint, `lint-docker`, `lint-md`, a check of the size of the [Docker Hub description](docker.md#docker-hub-description), `lint-ts`, `typecheck`, `build`, and `test-ci`, in that order. Run them yourself before you open a pull request.
 
 ```bash
 pnpm run format-check

@@ -1,6 +1,6 @@
 # Docker
 
-The `Dockerfile` builds a production image of the server for `linux/amd64` and `linux/arm64`. CI builds it with Docker Bake and publishes it to Docker Hub as [`dndmapp/api-content`](https://hub.docker.com/r/dndmapp/api-content).
+The `Dockerfile` builds a production image of the server for `linux/amd64` and `linux/arm64`. CI builds it with Docker Bake and publishes it to Docker Hub as [`dndmapp/api-content`](https://hub.docker.com/r/dndmapp/api-content). The [image README](../.docker/README.md), which is also its overview on Docker Hub, explains how to run it.
 
 ## The image
 
@@ -31,7 +31,7 @@ The Bake file, `docker-bake.hcl`, defines two targets. The `default` target buil
 docker buildx bake
 ```
 
-It tags the image `dndmapp/api-content:local`. Docker can only load a multi-platform image when it uses the containerd image store, which new installs of Docker Desktop turn on by default.
+It tags the image `dndmapp/api-content:local`, which runs as the [image README](../.docker/README.md#running) describes. Docker can only load a multi-platform image when it uses the containerd image store, which new installs of Docker Desktop turn on by default.
 
 Build the image for the platform of your machine alone:
 
@@ -47,13 +47,7 @@ The composite action in `.github/actions/docker` sets up Buildx, logs in to Dock
 
 ### Tags
 
-| Event                | Tags                                                 | Workflow            |
-|:---------------------|:-----------------------------------------------------|:--------------------|
-| Pull request         | `pr-<N>`                                             | `pull-request.yaml` |
-| Push to `main`       | `edge` and `sha-<short-sha>`                         | `push-main.yaml`    |
-| Release tag `vX.Y.Z` | `X.Y.Z`, `X.Y`, and `latest`, plus `X` from 1.0.0 on | `release.yaml`      |
-
-`latest` moves only on releases, and `edge` follows `main`. The bare major tag is left out for `0.y.z` versions, because any 0.x release may break the API.
+Each event pushes its own tags: a pull request from `pull-request.yaml`, a push to `main` from `push-main.yaml`, and a release tag from `release.yaml`. The [image README](../.docker/README.md#tags) lists the tags of each event and explains `latest` and `edge`.
 
 ### Workflows
 
@@ -63,109 +57,35 @@ On `main`, the `docker` job waits for CI, so `edge` only moves to a commit that 
 
 ### Path filter
 
-On pull requests and on `main`, a `changes` job runs the composite action in `.github/actions/image-changes` first. The action runs [`dorny/paths-filter`](https://github.com/dorny/paths-filter), and the image job only runs when the change touches one of these paths. Changes to the docs alone build no image. Releases build without the filter.
+On pull requests and on `main`, a `changes` job runs the composite action in `.github/actions/changes` first. The action runs [`dorny/paths-filter`](https://github.com/dorny/paths-filter), and its `image` output tells the image job to run only when the change touches one of these paths. Changes to the docs alone build no image. Releases build without the filter.
 
 - The files that `.dockerignore` lets in, without the specs under `src`, which never reach `dist`.
 - The `Dockerfile`, `.dockerignore`, and `docker-bake.hcl`.
-- The composite actions in `.github/actions/docker` and `.github/actions/image-changes`, and the workflow that runs the job, so a change to the pipeline tests itself.
+- The composite actions in `.github/actions/docker` and `.github/actions/changes`, and the workflow that runs the job, so a change to the pipeline tests itself.
 
 A pull request compares with its base, so once it touches the image, every later push rebuilds `pr-<N>`. `main` compares each push with the previous one, which for a merge commit covers the whole pull request. When a merge leaves the image alone, `edge` keeps pointing at the last build, and that commit gets no `sha-<short-sha>` tag. Each workflow passes its own path to the action, so add a new path to the filter in the action alone.
+
+### Docker Hub description
+
+The overview and the short description of the repository on Docker Hub come from two files: `.docker/README.md` and `.docker/short-description.txt`. On `main`, the `docker-hub-description` job syncs both with [`peter-evans/dockerhub-description`](https://github.com/peter-evans/dockerhub-description) when the `description` output of the `changes` action says that either file changed. A change to the job or the action alone does not sync. The job drops the final newline of the short description before the sync. It logs in with `DOCKERHUB_TOKEN_DELETE`, because Docker Hub answers `403 Forbidden` when a token without the `delete` scope updates a description.
+
+The job does not wait for CI. The `CI` job of the pull request runs the same checks and is a required status check, and the ruleset requires the branch to be up to date before it merges. The text on `main` has therefore already passed. When two syncs overlap, the newer one cancels the older one.
+
+Docker Hub limits the short description to 100 bytes and the overview to 25,000 bytes, and the action truncates longer text with only a warning in the log. A step of the CI checks fails when either file is larger, counting the short description without its final newline. Write the links of the overview as absolute URLs, since the action resolves relative links from the root of the repository rather than from `.docker`. Edits made on Docker Hub itself last only until the next sync, so change the files instead.
 
 ### Credentials
 
 The workflows log in with personal access tokens of the `dndmapp` Docker Hub account. Each token has only the scope its job needs. The variable and the secrets live at the level of the GitHub organization.
 
-| Name                     | Kind     | Scope               | Used by                                                 |
-|:-------------------------|:---------|:--------------------|:--------------------------------------------------------|
-| `DOCKERHUB_USERNAME`     | Variable |                     | Every login, and the namespace of the image             |
-| `DOCKERHUB_TOKEN_READ`   | Secret   | `read`              | Nothing yet                                             |
-| `DOCKERHUB_TOKEN_WRITE`  | Secret   | `read,write`        | The image jobs of the pull request, `main`, and release |
-| `DOCKERHUB_TOKEN_DELETE` | Secret   | `read,write,delete` | `remove-image-tag` in `pull-request-closed.yaml`        |
-
-## Running
-
-The examples below pull `latest`, the last release. Use the `edge` tag for the last build of `main`, or `local` for an image you built yourself.
-
-Run the image with a read-only root filesystem, without capabilities, and without privilege escalation. The server needs none of them.
-
-```bash
-docker run --rm --publish 3000:3000 --read-only --cap-drop=ALL --security-opt=no-new-privileges dndmapp/api-content
-```
-
-The server listens on port `3000` by default, the same port as `pnpm run start`. Set the [environment variables](configuration.md#environment-variables) with `--env`, such as `--env PORT=8080`, and publish the port you chose. The image does not load a `.env` file, since `.dockerignore` keeps it out of the build context.
-
-The server stops gracefully on `SIGTERM`, which `docker stop` sends, so open requests finish first.
-
-## Docker Compose
-
-A Compose service takes the same settings as the `docker run` command above. It needs no `healthcheck` key, since it inherits the `HEALTHCHECK` of the image.
-
-```yaml
-services:
-    api-content:
-        image: dndmapp/api-content
-        ports:
-            - "3000:3000"
-        read_only: true
-        cap_drop:
-            - ALL
-        security_opt:
-            - no-new-privileges:true
-```
-
-Start it with `docker compose up --detach`, and check its health with `docker compose ps`, which shows `healthy` once the server is ready. Set the [environment variables](configuration.md#environment-variables) under `environment`, and change the port mapping to match `PORT`. Another service that needs the API can wait for it with `depends_on` and `condition: service_healthy`.
+| Name                     | Kind     | Scope               | Used by                                                                                            |
+|:-------------------------|:---------|:--------------------|:---------------------------------------------------------------------------------------------------|
+| `DOCKERHUB_USERNAME`     | Variable |                     | Every login, and the namespace of the image                                                        |
+| `DOCKERHUB_TOKEN_READ`   | Secret   | `read`              | Nothing yet                                                                                        |
+| `DOCKERHUB_TOKEN_WRITE`  | Secret   | `read,write`        | The image jobs of the pull request, `main`, and release                                            |
+| `DOCKERHUB_TOKEN_DELETE` | Secret   | `read,write,delete` | `remove-image-tag` in `pull-request-closed.yaml`, and `docker-hub-description` in `push-main.yaml` |
 
 ## Health check
 
-The `HEALTHCHECK` of the image runs `.docker/healthcheck.js`, which requests `GET /health/ready` on `127.0.0.1` and the port in `PORT`. The script exits with `0` when the server answers with a success status, and with `1` otherwise. Docker marks the container unhealthy after three failures in a row.
+The [image README](../.docker/README.md#health-check) describes the `HEALTHCHECK` of the image and its options. It runs `.docker/healthcheck.js`, which exits with `0` when `GET /health/ready` answers with a success status, and with `1` otherwise.
 
 The script reads `PORT` from `process.env` directly, an exception to the rule in [Configuration](configuration.md#namespaces), since the `server` namespace would load NestJS and Zod on every check. Like the namespace, it falls back to `3000` when `PORT` is unset or empty.
-
-| Option             | Value | Meaning                                                    |
-|:-------------------|------:|:-----------------------------------------------------------|
-| `--interval`       | `30s` | The time between two checks once the container has started |
-| `--timeout`        |  `3s` | The time a check may take before it counts as a failure    |
-| `--start-period`   | `10s` | The time during which failures do not count                |
-| `--start-interval` |  `1s` | The time between two checks during the start period        |
-| `--retries`        |   `3` | The failures in a row that mark the container unhealthy    |
-
-Keep `HOST` at an address that includes `127.0.0.1`, such as the default `0.0.0.0`, or the health check cannot reach the server.
-
-## Kubernetes
-
-Kubernetes ignores the `HEALTHCHECK` of an image, so configure its probes on the container. The startup and liveness probes request `/health/live`, so a failing dependency never restarts the container. The readiness probe requests `/health/ready`, so the container gets traffic only when it can serve it. [Architecture](architecture.md#health-probes) explains the difference.
-
-```yaml
-containers:
-    - name: api-content
-      image: dndmapp/api-content
-      ports:
-          - name: http
-            containerPort: 3000
-      securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-              drop: ["ALL"]
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-      startupProbe:
-          httpGet:
-              path: /health/live
-              port: http
-          periodSeconds: 1
-          failureThreshold: 30
-      livenessProbe:
-          httpGet:
-              path: /health/live
-              port: http
-          periodSeconds: 10
-          failureThreshold: 3
-      readinessProbe:
-          httpGet:
-              path: /health/ready
-              port: http
-          periodSeconds: 5
-          failureThreshold: 3
-```
-
-The liveness and readiness probes start once the startup probe succeeds. `runAsNonRoot` works because the image sets its user by ID, `1000:1000`.

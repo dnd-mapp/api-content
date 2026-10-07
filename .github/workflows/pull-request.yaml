@@ -37,14 +37,14 @@ jobs:
             contents: read
             pull-requests: read
         outputs:
-            docker: ${{ steps.changes.outputs.docker }}
+            image: ${{ steps.changes.outputs.image }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - name: Detect changes to the image
+            - name: Detect changes
               id: changes
-              uses: ./.github/actions/image-changes
+              uses: ./.github/actions/changes
               with:
                   workflow: .github/workflows/pull-request.yaml
 
@@ -52,7 +52,7 @@ jobs:
         name: Docker
         needs: changes
         # A pull request from a fork gets no secrets, so it cannot push an image.
-        if: needs.changes.outputs.docker == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+        if: needs.changes.outputs.image == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         runs-on: ubuntu-26.04
         timeout-minutes: 10
         permissions:

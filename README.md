@@ -30,7 +30,8 @@ The server reads its configuration from environment variables, which it also loa
 - [Architecture](docs/architecture.md): the project layout, the modules, and the health probes.
 - [Configuration](docs/configuration.md): the environment variables and the configuration namespaces.
 - [Building and testing](docs/building-and-testing.md): the build, the tests, and the checks that CI runs.
-- [Docker](docs/docker.md): building and running the image, and the probes for Kubernetes.
+- [Docker](docs/docker.md): building and publishing the image.
+- [Image](.docker/README.md): the tags of the image, running it, its health check, and the probes for Kubernetes.
 - [Releasing](docs/releasing.md): the steps to publish a release.
 
 ## Contributing
