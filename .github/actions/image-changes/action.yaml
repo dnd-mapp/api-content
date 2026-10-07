@@ -1,0 +1,42 @@
+name: Image changes
+description: Detects whether the event changes a file that goes into the image or into the pipeline that builds it
+
+inputs:
+    workflow:
+        description: The path of the workflow that runs the image job, so a change to the workflow tests itself
+        required: true
+
+outputs:
+    docker:
+        description: Whether the event changes the image, as `true` or `false`
+        value: ${{ steps.filter.outputs.docker }}
+
+runs:
+    using: composite
+    steps:
+        # A pull request compares with its base through the GitHub API and ignores `base`, so once it touches the image,
+        # every later push rebuilds pr-<N>. A push to main compares with the previous push, which for a merge commit
+        # covers the whole pull request.
+        - name: Detect changes to the image
+          id: filter
+          uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+          with:
+              base: main
+              predicate-quantifier: some-with-excludes
+              filters: |
+                  docker:
+                      - src/**
+                      - "!src/**/*.spec.ts"
+                      - .docker/healthcheck.js
+                      - package.json
+                      - pnpm-lock.yaml
+                      - pnpm-workspace.yaml
+                      - nest-cli.json
+                      - .swcrc
+                      - tsconfig*.json
+                      - Dockerfile
+                      - .dockerignore
+                      - docker-bake.hcl
+                      - .github/actions/docker/**
+                      - .github/actions/image-changes/**
+                      - ${{ inputs.workflow }}

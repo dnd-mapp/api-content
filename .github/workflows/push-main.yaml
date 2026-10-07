@@ -29,34 +29,16 @@ jobs:
         permissions:
             contents: read
         outputs:
-            docker: ${{ steps.filter.outputs.docker }}
+            docker: ${{ steps.changes.outputs.docker }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            # Compares the push with the previous push to main, which for a merge commit covers the whole pull request.
             - name: Detect changes to the image
-              id: filter
-              uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+              id: changes
+              uses: ./.github/actions/image-changes
               with:
-                  base: main
-                  predicate-quantifier: some-with-excludes
-                  filters: |
-                      docker:
-                          - src/**
-                          - "!src/**/*.spec.ts"
-                          - .docker/healthcheck.js
-                          - package.json
-                          - pnpm-lock.yaml
-                          - pnpm-workspace.yaml
-                          - nest-cli.json
-                          - .swcrc
-                          - tsconfig*.json
-                          - Dockerfile
-                          - .dockerignore
-                          - docker-bake.hcl
-                          - .github/actions/docker/**
-                          - .github/workflows/push-main.yaml
+                  workflow: .github/workflows/push-main.yaml
 
     # Waits for CI, so edge only moves to a commit that passed.
     docker:
