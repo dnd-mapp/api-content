@@ -37,9 +37,22 @@ The pre-commit hooks only check files. Run `pnpm run format` to fix formatting i
 
 ## Changelog and versioning
 
-This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Record every notable change for the people who run or call the server under `[Unreleased]` in `CHANGELOG.md`, using the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
+This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Record every change that the people who call the API or run the published image would notice under `[Unreleased]` in `CHANGELOG.md`, using the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. The changelog becomes the release notes, so ask of each change whether those people would notice it without reading the repository.
 
-A removed or renamed endpoint, a changed response, and a changed environment variable are breaking changes. Say so in the changelog entry.
+These changes get an entry:
+
+- An endpoint, a response, a status code, or a header that clients see.
+- An environment variable that the published image reads.
+- The contract of the image: its platforms, its user, its port, its health check, its tags, and how it starts and stops.
+- A dependency update that changes any of the above, or that fixes a vulnerability in the image. Record a vulnerability fix under `Security`.
+
+These changes do not:
+
+- How the `Dockerfile`, the build, and the workflows produce the image.
+- Configuration that only a local run reads, such as the `.env` files.
+- Tooling, tests, docs, refactors, and routine dependency updates.
+
+A removed or renamed endpoint, a changed response, and a changed environment variable are breaking changes. So is a change that breaks how the image is run, such as a new port or user, a dropped platform, or a removed tag. Say so in the changelog entry.
 
 A maintainer ships the recorded changes as described in [Releasing](docs/releasing.md).
 
