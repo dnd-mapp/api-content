@@ -6,40 +6,7 @@ Each machine needs a one-time setup: install mkcert, trust its CA, and point `lo
 
 ## Installing mkcert
 
-### Windows
-
-Install mkcert with [Scoop](https://scoop.sh/) or [Chocolatey](https://chocolatey.org/):
-
-```powershell
-scoop bucket add extras
-scoop install mkcert
-```
-
-```powershell
-choco install mkcert
-```
-
-### macOS
-
-Install mkcert with [Homebrew](https://brew.sh/). Firefox keeps its own list of trusted CAs, and mkcert needs `certutil` from `nss` to add its CA there, so install `nss` too when you use Firefox:
-
-```bash
-brew install mkcert
-brew install nss
-```
-
-### Linux
-
-Install `certutil` first, which mkcert needs to add its CA to Firefox and Chromium. Use the package of your distribution:
-
-```bash
-sudo apt install libnss3-tools
-sudo dnf install nss-tools
-sudo pacman -S nss
-sudo zypper install mozilla-nss-tools
-```
-
-Then install mkcert with [Homebrew](https://brew.sh/) or from the [prebuilt binaries](https://github.com/FiloSottile/mkcert/releases) of its releases.
+Install mkcert as its [installation guide](https://github.com/FiloSottile/mkcert#installation) describes for your platform, including `certutil` when you use Firefox.
 
 ## Trusting the CA
 
