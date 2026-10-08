@@ -18,11 +18,14 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                                                         |
 | `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                                            |
 | `tools/setup-https.ts`            | The `setup-https` script, which creates the certificate of the dev server with mkcert                    |
+| `testing/index.ts`                | The public entry of the test helpers, behind the `@/testing` alias                                       |
+| `testing/mocks/fs.ts`             | The mock of `node:fs`, which reads in-memory files that a spec adds with `givenFile`                     |
+| `__mocks__/fs.ts`                 | Forwards `vi.mock('node:fs')` to the mock in `testing`, since Vitest looks for it only in this folder    |
 | `.env.example`                    | The environment variables, to copy into a `.env` or `.env.local` file                                    |
 | `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                                               |
 | `tsconfig.json`                   | The solution file, and the shared base that the three projects build on                                  |
 | `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                                      |
-| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                                                          |
+| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals, the test helpers, and the mocks                         |
 | `tsconfig.tools.json`             | The tools project, for the config files in the repository root and the scripts in `tools`                |
 | `.docker/healthcheck.js`          | The `HEALTHCHECK` of the Docker image, which requests the readiness endpoint                             |
 
