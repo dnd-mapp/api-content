@@ -1,17 +1,22 @@
 import { serverConfig, tlsConfig } from '@/config';
+import { Logger } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { AppModule, configModule } from './app.module';
+import { listeningUrl } from './listening-url';
 
-/** Returns the adapter, which serves HTTPS when the `tls` namespace holds a certificate and a key, and HTTP otherwise. */
+/**
+ * Returns the adapter and whether it serves HTTPS, which it does when the `tls` namespace holds a certificate and a key.
+ * It serves HTTP otherwise.
+ */
 function createAdapter() {
     const { cert, key } = tlsConfig();
 
     if (cert === undefined || key === undefined) {
-        return new FastifyAdapter();
+        return { adapter: new FastifyAdapter(), https: false };
     }
-    return new FastifyAdapter({ https: { cert, key } });
+    return { adapter: new FastifyAdapter({ https: { cert, key } }), https: true };
 }
 
 async function bootstrap() {
@@ -20,13 +25,16 @@ async function bootstrap() {
     // failed validation rejects with its error.
     await configModule;
 
-    const app = await NestFactory.create<NestFastifyApplication>(AppModule, createAdapter());
+    const { adapter, https } = createAdapter();
+    const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter);
     const { host, port } = app.get<ConfigType<typeof serverConfig>>(serverConfig.KEY);
 
     // Closes the application on SIGTERM, so a container orchestrator can stop it gracefully.
     app.enableShutdownHooks();
 
     await app.listen(port, host);
+
+    new Logger('Bootstrap').log(`Listening on ${listeningUrl({ host, port, https })}`);
 }
 
 await bootstrap();
