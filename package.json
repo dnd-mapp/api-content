@@ -17,6 +17,7 @@
   },
   "scripts": {
     "start": "nest start --watch",
+    "setup-https": "node tools/setup-https.ts",
     "build": "nest build",
     "test": "vitest --ui",
     "test-ci": "vitest run",

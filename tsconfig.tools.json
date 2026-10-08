@@ -1,7 +1,13 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "./tsconfig.json",
-    "include": [".prettierrc.ts", "commitlint.config.ts", "eslint.config.ts", "vitest.config.ts"],
+    "include": [
+        ".prettierrc.ts",
+        "commitlint.config.ts",
+        "eslint.config.ts",
+        "vitest.config.ts",
+        "tools/setup-https.ts"
+    ],
     "compilerOptions": {
         "allowImportingTsExtensions": true,
         "erasableSyntaxOnly": true
