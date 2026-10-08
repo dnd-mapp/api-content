@@ -61,6 +61,13 @@
             "problemMatcher": []
         },
         {
+            "label": "setup-https",
+            "detail": "Creates the certificate of the dev server with mkcert",
+            "type": "shell",
+            "command": "pnpm run setup-https",
+            "problemMatcher": []
+        },
+        {
             "label": "start",
             "detail": "Starts the server in watch mode with the Nest CLI",
             "type": "shell",

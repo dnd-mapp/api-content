@@ -4,25 +4,30 @@
 
 The repository is a NestJS workspace with a single application. The Nest CLI reads `nest-cli.json` to find the sources, the entry file, and the TypeScript project it compiles with.
 
-| File                              | Purpose                                                                               |
-|:----------------------------------|:--------------------------------------------------------------------------------------|
-| `src/main.ts`                     | Creates the application, enables the shutdown hooks, and listens on the host and port |
-| `src/app.module.ts`               | The root module, which loads the configuration and imports the feature modules        |
-| `src/config/environment.ts`       | The Zod schema that validates every environment variable, merged from the namespaces  |
-| `src/config/server.config.ts`     | The `server` namespace, with the host and port that the server listens on             |
-| `src/config/empty-as-unset.ts`    | The helper that treats an empty environment variable as unset                         |
-| `src/config/index.ts`             | The public entry of the configuration, behind the `@/config` alias                    |
-| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller                |
-| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias                    |
-| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                                      |
-| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                         |
-| `.env.example`                    | The environment variables, to copy into a `.env` or `.env.local` file                 |
-| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                            |
-| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on               |
-| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                   |
-| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals                                       |
-| `tsconfig.tools.json`             | The tools project, for the config files in the repository root                        |
-| `.docker/healthcheck.js`          | The `HEALTHCHECK` of the Docker image, which requests the readiness endpoint          |
+| File                              | Purpose                                                                                                  |
+|:----------------------------------|:---------------------------------------------------------------------------------------------------------|
+| `src/main.ts`                     | Creates the application over HTTPS or HTTP, enables the shutdown hooks, and listens on the host and port |
+| `src/app.module.ts`               | The root module, which loads the configuration and imports the feature modules                           |
+| `src/config/environment.ts`       | The Zod schema that validates every environment variable, merged from the namespaces                     |
+| `src/config/server.config.ts`     | The `server` namespace, with the host and port that the server listens on                                |
+| `src/config/tls.config.ts`        | The `tls` namespace, with the certificate and key that the server serves HTTPS with                      |
+| `src/config/empty-as-unset.ts`    | The helper that treats an empty environment variable as unset                                            |
+| `src/config/index.ts`             | The public entry of the configuration, behind the `@/config` alias                                       |
+| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller                                   |
+| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias                                       |
+| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                                                         |
+| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                                            |
+| `tools/setup-https.ts`            | The `setup-https` script, which creates the certificate of the dev server with mkcert                    |
+| `testing/index.ts`                | The public entry of the test helpers, behind the `@/testing` alias                                       |
+| `testing/mocks/fs.ts`             | The mock of `node:fs`, which reads in-memory files that a spec adds with `givenFile`                     |
+| `__mocks__/fs.ts`                 | Forwards `vi.mock('node:fs')` to the mock in `testing`, since Vitest looks for it only in this folder    |
+| `.env.example`                    | The environment variables, to copy into a `.env` or `.env.local` file                                    |
+| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                                               |
+| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on                                  |
+| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                                      |
+| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals, the test helpers, and the mocks                         |
+| `tsconfig.tools.json`             | The tools project, for the config files in the repository root and the scripts in `tools`                |
+| `.docker/healthcheck.js`          | The `HEALTHCHECK` of the Docker image, which requests the readiness endpoint                             |
 
 ## Modules
 

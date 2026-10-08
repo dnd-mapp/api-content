@@ -12,7 +12,8 @@
         "noEmit": true,
         "paths": {
             "@/config": ["./src/config/index.ts"],
-            "@/health": ["./src/health/index.ts"]
+            "@/health": ["./src/health/index.ts"],
+            "@/testing": ["./testing/index.ts"]
         },
         "verbatimModuleSyntax": true
     }

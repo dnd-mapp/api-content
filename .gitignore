@@ -20,6 +20,8 @@ dist/
 
 .tmp/
 
+.certs/
+
 .env
 .env.*
 !.env.example

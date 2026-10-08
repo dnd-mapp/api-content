@@ -15,7 +15,7 @@ The `Dockerfile` has four stages.
 
 The install and build stages run on the platform of the builder, and the final stage only copies files. A multi-platform build therefore installs and compiles once, and needs no emulation. Every base image is pinned by tag and digest, and Renovate keeps the digests current. It moves the Node.js and pnpm images in the same pull request as `devEngines` in `package.json`.
 
-The image runs `node --enable-source-maps dist/main.js` from `/app` as the unprivileged `node` user, with `NODE_ENV=production`. The files belong to root, so the server can read them but not change them. The source maps ship with the image, so a stack trace points to the TypeScript sources.
+The image runs `node --enable-source-maps dist/main.js` from `/app` as the unprivileged `node` user, with `NODE_ENV=production`. It serves HTTP only, since the ingress in front of it terminates TLS, and the `HEALTHCHECK` and the Kubernetes probes request it over HTTP. With `NODE_ENV=production`, the server refuses to start when `TLS_CERT_FILE` or `TLS_KEY_FILE` is set, rather than ignore them. The files belong to root, so the server can read them but not change them. The source maps ship with the image, so a stack trace points to the TypeScript sources.
 
 The `.dockerignore` file lets only the sources, the health check script, the package manifest, the lockfile, and the compiler configs into the build context. Add a file there when the build needs it, and to the [path filter](#path-filter).
 

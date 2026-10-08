@@ -13,7 +13,13 @@ Install Node.js and pnpm in the versions that `devEngines` in `package.json` set
 pnpm install
 ```
 
-Start the server in watch mode, which recompiles and restarts it as you edit.
+The server only serves HTTPS locally, with a certificate from [mkcert](https://github.com/FiloSottile/mkcert). Set up mkcert and the host once per machine as [Local HTTPS](docs/local-https.md) describes, then create the certificate.
+
+```bash
+pnpm run setup-https
+```
+
+Start the server in watch mode, which recompiles and restarts it as you edit. It serves `https://localhost.content.dndmapp.dev:3000`.
 
 ```bash
 pnpm run start
@@ -29,6 +35,7 @@ The server reads its configuration from environment variables, which it also loa
 
 - [Architecture](docs/architecture.md): the project layout, the modules, and the health probes.
 - [Configuration](docs/configuration.md): the environment variables and the configuration namespaces.
+- [Local HTTPS](docs/local-https.md): the one-time setup of mkcert and the host for the dev server.
 - [Building and testing](docs/building-and-testing.md): the build, the tests, and the checks that CI runs.
 - [Docker](docs/docker.md): building and publishing the image.
 - [Image](.docker/README.md): the tags of the image, running it, its health check, and the probes for Kubernetes.

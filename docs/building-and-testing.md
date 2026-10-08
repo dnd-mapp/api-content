@@ -8,6 +8,8 @@ The `build` script compiles the application with the Nest CLI into `dist`. [SWC]
 
 Tests use Vitest. The specs in `src` test a class through a testing module from `@nestjs/testing` that imports the module of the class, so the module resolves the dependencies the same way it does in the application. An end-to-end suite will follow in a later change. Vitest reads `experimentalDecorators` and `emitDecoratorMetadata` from the TypeScript project, so the decorators of NestJS work without a plugin. Coverage must stay above the thresholds in `vitest.config.ts`.
 
+A spec that reads files mocks `node:fs` rather than write files to disk. It calls `vi.mock('node:fs')`, which loads the mock in `testing/mocks/fs.ts` through `__mocks__/fs.ts`, and adds the files it needs with `givenFile` from `@/testing`. The mock clears the files after each test, and holds only the functions that the code under test calls, so a spec never touches the real file system. Add a function to the mock when the code starts to call it.
+
 ## Checks
 
 Check and format the repository with these commands. CI runs `format-check`, actionlint, `lint-docker`, `lint-md`, a check of the size of the [Docker Hub description](docker.md#docker-hub-description), `lint-ts`, `typecheck`, `build`, and `test-ci`, in that order. Run them yourself before you open a pull request.

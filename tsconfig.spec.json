@@ -1,7 +1,7 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "./tsconfig.app.json",
-    "include": ["src"],
+    "include": ["__mocks__", "src", "testing"],
     "exclude": [],
     "compilerOptions": {
         "rootDir": ".",
