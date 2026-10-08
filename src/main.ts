@@ -2,17 +2,16 @@ import { serverConfig, tlsConfig } from '@/config';
 import type { ConfigType } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import { readFileSync } from 'node:fs';
 import { AppModule, configModule } from './app.module';
 
 /** Returns the adapter, which serves HTTPS when the `tls` namespace holds a certificate and a key, and HTTP otherwise. */
 function createAdapter() {
-    const { certFile, keyFile } = tlsConfig();
+    const { cert, key } = tlsConfig();
 
-    if (certFile === undefined || keyFile === undefined) {
+    if (cert === undefined || key === undefined) {
         return new FastifyAdapter();
     }
-    return new FastifyAdapter({ https: { cert: readFileSync(certFile), key: readFileSync(keyFile) } });
+    return new FastifyAdapter({ https: { cert, key } });
 }
 
 async function bootstrap() {

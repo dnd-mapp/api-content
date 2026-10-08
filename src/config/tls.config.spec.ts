@@ -1,21 +1,15 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { givenFile } from '@/testing';
 import { tlsConfig } from './tls.config';
 
+vi.mock('node:fs');
+
+/** Returns the message that the factory reports for a file that cannot be read. */
+function unreadable(path: string) {
+    return `must be a readable file, but "${path}" is missing or cannot be read. Run "pnpm run setup-https" to create it.`;
+}
+
 describe('tlsConfig', () => {
-    const originalDirectory = process.cwd();
-
-    // The default certificate and key are relative to the working directory, so each test runs in an empty one.
-    beforeEach(() => {
-        process.chdir(mkdtempSync(join(tmpdir(), 'api-content-')));
-    });
-
     afterEach(() => {
-        const directory = process.cwd();
-
-        process.chdir(originalDirectory);
-        rmSync(directory, { recursive: true });
         vi.unstubAllEnvs();
     });
 
@@ -25,31 +19,60 @@ describe('tlsConfig', () => {
         });
 
         it('reads the certificate and key from .certs by default', () => {
-            mkdirSync('.certs');
-            writeFileSync('.certs/cert.pem', 'certificate');
-            writeFileSync('.certs/key.pem', 'key');
+            givenFile('.certs/cert.pem', 'certificate');
+            givenFile('.certs/key.pem', 'key');
 
-            expect(tlsConfig()).toEqual({ certFile: '.certs/cert.pem', keyFile: '.certs/key.pem' });
+            expect(tlsConfig()).toEqual({ cert: Buffer.from('certificate'), key: Buffer.from('key') });
         });
 
         it('reads the certificate and key from TLS_CERT_FILE and TLS_KEY_FILE', () => {
-            writeFileSync('cert.pem', 'certificate');
-            writeFileSync('key.pem', 'key');
+            givenFile('cert.pem', 'certificate');
+            givenFile('key.pem', 'key');
             vi.stubEnv('TLS_CERT_FILE', 'cert.pem');
             vi.stubEnv('TLS_KEY_FILE', 'key.pem');
 
-            expect(tlsConfig()).toEqual({ certFile: 'cert.pem', keyFile: 'key.pem' });
+            expect(tlsConfig()).toEqual({ cert: Buffer.from('certificate'), key: Buffer.from('key') });
         });
 
-        it('throws when the certificate and key are missing', () => {
-            expect(() => tlsConfig()).toThrow('pnpm run setup-https');
+        it('reports the certificate and key together when neither can be read', () => {
+            expect(() => tlsConfig()).toThrow(
+                new Error(
+                    [
+                        'Config validation error:',
+                        `✖ ${unreadable('.certs/cert.pem')}`,
+                        '  → at TLS_CERT_FILE',
+                        `✖ ${unreadable('.certs/key.pem')}`,
+                        '  → at TLS_KEY_FILE',
+                    ].join('\n'),
+                ),
+            );
+        });
+
+        it('reports only the file that cannot be read', () => {
+            givenFile('.certs/key.pem', 'key');
+
+            expect(() => tlsConfig()).toThrow(
+                new Error(
+                    ['Config validation error:', `✖ ${unreadable('.certs/cert.pem')}`, '  → at TLS_CERT_FILE'].join(
+                        '\n',
+                    ),
+                ),
+            );
         });
     });
 
     it('returns no certificate and key when NODE_ENV is production', () => {
         vi.stubEnv('NODE_ENV', 'production');
 
-        expect(tlsConfig()).toEqual({ certFile: undefined, keyFile: undefined });
+        expect(tlsConfig()).toEqual({ cert: undefined, key: undefined });
+    });
+
+    it('rejects TLS_CERT_FILE when NODE_ENV is production', () => {
+        givenFile('cert.pem', 'certificate');
+        vi.stubEnv('NODE_ENV', 'production');
+        vi.stubEnv('TLS_CERT_FILE', 'cert.pem');
+
+        expect(() => tlsConfig()).toThrow('must be unset when NODE_ENV is production');
     });
 
     it('returns no certificate and key when NODE_ENV is test, even when TLS_CERT_FILE and TLS_KEY_FILE are set', () => {
@@ -57,6 +80,6 @@ describe('tlsConfig', () => {
         vi.stubEnv('TLS_CERT_FILE', 'missing.pem');
         vi.stubEnv('TLS_KEY_FILE', 'missing.pem');
 
-        expect(tlsConfig()).toEqual({ certFile: undefined, keyFile: undefined });
+        expect(tlsConfig()).toEqual({ cert: undefined, key: undefined });
     });
 });

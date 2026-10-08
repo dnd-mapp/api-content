@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { accessSync, constants, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { z } from 'zod';
 import { emptyAsUnset } from './empty-as-unset';
 
@@ -31,51 +31,26 @@ function filesOf({ NODE_ENV, TLS_CERT_FILE, TLS_KEY_FILE }: TlsEnvironment) {
     return { TLS_CERT_FILE: TLS_CERT_FILE ?? DEFAULT_CERT_FILE, TLS_KEY_FILE: TLS_KEY_FILE ?? DEFAULT_KEY_FILE };
 }
 
-function isReadableFile(path: string) {
-    try {
-        accessSync(path, constants.R_OK);
-
-        return statSync(path).isFile();
-    } catch {
-        return false;
-    }
-}
-
 /**
  * The rule across `NODE_ENV` and the TLS variables. Spreading the shape of `tlsSchema` drops a refinement, so
  * `environmentSchema` applies this check after merging the shapes of the namespaces.
  *
- * Zod skips a refinement once any variable is invalid, which would hide a missing certificate behind an invalid
- * `HOST`. The check therefore runs whenever its own variables are valid.
+ * Zod skips a refinement once any variable is invalid, which would hide a TLS variable that production rejects behind
+ * an invalid `HOST`. The check therefore runs whenever its own variables are valid.
  */
 export const checkTls = z.superRefine<TlsEnvironment>(
     (environment, context) => {
-        if (environment.NODE_ENV === 'production') {
-            for (const name of ['TLS_CERT_FILE', 'TLS_KEY_FILE'] as const) {
-                const value = environment[name];
-
-                if (value !== undefined) {
-                    context.addIssue({
-                        code: 'custom',
-                        input: value,
-                        message: `must be unset when NODE_ENV is production, since the image serves HTTP only, but is "${value}".`,
-                        path: [name],
-                    });
-                }
-            }
+        if (environment.NODE_ENV !== 'production') {
             return;
         }
-        const files = filesOf(environment);
+        for (const name of ['TLS_CERT_FILE', 'TLS_KEY_FILE'] as const) {
+            const value = environment[name];
 
-        if (files === undefined) {
-            return;
-        }
-        for (const [name, path] of Object.entries(files)) {
-            if (!isReadableFile(path)) {
+            if (value !== undefined) {
                 context.addIssue({
                     code: 'custom',
-                    input: path,
-                    message: `must be a readable file, but "${path}" is missing or cannot be read. Run "pnpm run setup-https" to create it.`,
+                    input: value,
+                    message: `must be unset when NODE_ENV is production, since the image serves HTTP only, but is "${value}".`,
                     path: [name],
                 });
             }
@@ -84,12 +59,47 @@ export const checkTls = z.superRefine<TlsEnvironment>(
     { when: (payload) => tlsSchema.safeParse(payload.value).success },
 );
 
+/** Reads the file that the variable names, and reports it as an issue of the variable when the read fails. */
+function readTlsFile(name: keyof TlsEnvironment, path: string, context: z.RefinementCtx) {
+    try {
+        return readFileSync(path);
+    } catch {
+        context.addIssue({
+            code: 'custom',
+            input: path,
+            message: `must be a readable file, but "${path}" is missing or cannot be read. Run "pnpm run setup-https" to create it.`,
+            path: [name],
+        });
+        return undefined;
+    }
+}
+
+/**
+ * Reads the certificate and the key while it validates the variables. It reads each file once, rather than check the
+ * files first and read them later, so a file that changes in between cannot slip past the check. It reads both files
+ * either way, so a missing certificate and key are reported together.
+ */
+const tlsFilesSchema = tlsSchema.check(checkTls).transform((environment, context) => {
+    const files = filesOf(environment);
+
+    if (files === undefined) {
+        return { cert: undefined, key: undefined };
+    }
+    return {
+        cert: readTlsFile('TLS_CERT_FILE', files.TLS_CERT_FILE, context),
+        key: readTlsFile('TLS_KEY_FILE', files.TLS_KEY_FILE, context),
+    };
+});
+
 /**
  * The `tls` namespace: the certificate and the key that the server serves HTTPS with, which are `undefined` when it
  * serves HTTP. `src/main.ts` calls the factory directly, since Fastify takes them before the application exists.
  */
 export const tlsConfig = registerAs('tls', () => {
-    const files = filesOf(tlsSchema.check(checkTls).parse(process.env));
+    const { data, error } = tlsFilesSchema.safeParse(process.env);
 
-    return { certFile: files?.TLS_CERT_FILE, keyFile: files?.TLS_KEY_FILE };
+    if (error !== undefined) {
+        throw new Error(`Config validation error:\n${z.prettifyError(error)}`);
+    }
+    return data;
 });
