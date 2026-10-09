@@ -50,9 +50,12 @@ jobs:
                   username: ${{ vars.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
 
+    # Waits for the image, so the release and its announcement never name a tag that is missing from Docker Hub.
     release:
         name: GitHub Release
-        needs: verify
+        needs:
+            - verify
+            - docker
         runs-on: ubuntu-26.04
         timeout-minutes: 5
         permissions:
