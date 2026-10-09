@@ -43,7 +43,7 @@ The server reads its configuration from environment variables, which it also loa
 
 ## Contributing
 
-Contributions are welcome. See the [contributing guide](CONTRIBUTING.md) for the setup, the code style, and the branch, commit, and pull request conventions.
+Read the [shared contributing guide](https://github.com/dnd-mapp/.github/blob/main/CONTRIBUTING.md) for how to take part and the conventions that every D&D Mapp repository follows. The [contributing guide of this repository](docs/contributing/README.md) adds its checks, code style, and changelog rules.
 
 ## License
 
