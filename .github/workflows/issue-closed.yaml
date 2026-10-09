@@ -19,7 +19,7 @@ jobs:
         steps:
             # Runs whatever the close reason, so an issue closed as not planned loses its assignees too. A reopened
             # issue stays unassigned until someone picks it up again.
-            - name: Remove the assignees of issue #${{ github.event.issue.number }}
+            - name: "Remove the assignees of issue #${{ github.event.issue.number }}"
               shell: bash
               run: gh issue edit "$ISSUE_NUMBER" --remove-assignee "$ASSIGNEES"
               env:
