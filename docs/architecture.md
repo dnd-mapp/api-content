@@ -24,7 +24,7 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `e2e/health.spec.ts`              | The end-to-end specs of the health endpoints, which request a running server                             |
 | `e2e/global-setup.ts`             | Picks the server that the suite requests, and starts the dev server when none answers                    |
 | `e2e/dev-server.ts`               | Starts the dev server, waits until it is ready, and stops its process tree                               |
-| `e2e/vitest.config.ts`            | The Vitest config of the end-to-end suite, which `pnpm run test-e2e` runs                                |
+| `e2e/vitest.config.ts`            | The Vitest config of the end-to-end suite, which `pnpm run e2e` and `e2e-ci` run                         |
 | `e2e/compose.yaml`                | The stack of the `E2E` job: the image behind Caddy, which terminates TLS                                 |
 | `e2e/Caddyfile`                   | The Caddy config of that stack, which serves `localhost` with a certificate of its own CA                |
 | `.env.example`                    | The environment variables, to copy into a `.env` or `.env.local` file                                    |

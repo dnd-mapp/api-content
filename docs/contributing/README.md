@@ -14,7 +14,7 @@ This page adds the details of `dnd-mapp/api-content` to the [shared contributing
 
 ## Checks
 
-On top of the [shared checks](https://github.com/dnd-mapp/.github/blob/main/CONTRIBUTING.md#checks), CI runs `lint-docker`, a check of the size of the Docker Hub description, `lint-ts`, `typecheck`, `build`, and `test-ci`, and the `E2E` job runs `test-e2e`. Run them before you open a pull request:
+On top of the [shared checks](https://github.com/dnd-mapp/.github/blob/main/CONTRIBUTING.md#checks), CI runs `lint-docker`, a check of the size of the Docker Hub description, `lint-ts`, `typecheck`, `build`, and `test-ci`, and the `E2E` job runs `e2e-ci`. Run them before you open a pull request:
 
 ```bash
 pnpm run lint-docker
@@ -22,10 +22,10 @@ pnpm run lint-ts
 pnpm run typecheck
 pnpm run build
 pnpm run test-ci
-pnpm run test-e2e
+pnpm run e2e-ci
 ```
 
-The `lint-docker` script needs a running Docker daemon, as the section on [repositories with Docker](https://github.com/dnd-mapp/.github/blob/main/CONTRIBUTING.md#repositories-with-docker) describes. The `test-e2e` script needs the [Local HTTPS](../local-https.md) setup. [Building and testing](../building-and-testing.md#checks) explains each check.
+The `lint-docker` script needs a running Docker daemon, as the section on [repositories with Docker](https://github.com/dnd-mapp/.github/blob/main/CONTRIBUTING.md#repositories-with-docker) describes. The `e2e-ci` script needs the [Local HTTPS](../local-https.md) setup. [Building and testing](../building-and-testing.md#checks) explains each check.
 
 ## Code style
 
