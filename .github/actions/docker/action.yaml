@@ -12,8 +12,7 @@ inputs:
 outputs:
     digest:
         description: The digest of the image index that the action pushed
-        # Bake keys its metadata by the name of the target.
-        value: ${{ fromJSON(steps.bake.outputs.metadata).ci['containerimage.digest'] }}
+        value: ${{ steps.digest.outputs.digest }}
 
 runs:
     using: composite
@@ -57,3 +56,15 @@ runs:
                   ${{ steps.meta.outputs.bake-file-annotations }}
               targets: ci
               push: true
+
+        # The runner evaluates the outputs of the action again after the post steps, when the outputs of the steps are
+        # empty, so parsing the metadata in the output itself fails the job. Bake keys the metadata by the name of the
+        # target, and --exit-status fails the step when the digest is missing.
+        - name: Read the digest of the image
+          id: digest
+          shell: bash
+          run: |
+              digest=$(jq --exit-status --raw-output '.ci["containerimage.digest"]' <<< "$METADATA")
+              echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          env:
+              METADATA: ${{ steps.bake.outputs.metadata }}
