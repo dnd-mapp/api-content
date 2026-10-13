@@ -54,22 +54,20 @@ jobs:
         concurrency:
             group: ${{ github.workflow }}-docker
             cancel-in-progress: false
-        outputs:
-            digest: ${{ steps.docker.outputs.digest }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Build and push the image
-              id: docker
               uses: ./.github/actions/docker
               with:
                   username: ${{ vars.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
 
-    # Tests the image that the Docker job pushed, or edge when the push leaves the image alone. It runs after the Docker
-    # job, so edge moves before the suite passes. The ruleset requires a pull request to be up to date before it merges,
-    # so the merged files already passed the suite as pr-<N>.
+    # Tests the image that the Docker job pushed by its sha-<short-sha> tag, which names this commit, unlike edge, which
+    # a later push moves. It tests edge when the push leaves the image alone. It runs after the Docker job, so edge
+    # moves before the suite passes. The ruleset requires a pull request to be up to date before it merges, so the
+    # merged files already passed the suite as pr-<N>.
     e2e:
         name: E2E
         needs: [changes, docker]
@@ -88,7 +86,7 @@ jobs:
               shell: bash
               run: |
                   case "$DOCKER_RESULT" in
-                      success) echo "ref=$DOCKERHUB_USERNAME/api-content@$DIGEST" >> "$GITHUB_OUTPUT" ;;
+                      success) echo "ref=$DOCKERHUB_USERNAME/api-content:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT" ;;
                       skipped) echo "ref=$DOCKERHUB_USERNAME/api-content:edge" >> "$GITHUB_OUTPUT" ;;
                       *)
                           echo "::error::The Docker job ended with $DOCKER_RESULT, so there is no image to test."
@@ -97,7 +95,6 @@ jobs:
                   esac
               env:
                   DOCKER_RESULT: ${{ needs.docker.result }}
-                  DIGEST: ${{ needs.docker.outputs.digest }}
                   DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
 
             - name: Checkout repository

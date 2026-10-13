@@ -9,11 +9,6 @@ inputs:
         description: A personal access token of the account with the write scope
         required: true
 
-outputs:
-    digest:
-        description: The digest of the image index that the action pushed
-        value: ${{ steps.digest.outputs.digest }}
-
 runs:
     using: composite
     steps:
@@ -45,7 +40,6 @@ runs:
 
         # Builds from the checkout of the job rather than from the Git context of the event.
         - name: Build and push the image
-          id: bake
           uses: docker/bake-action@018cb6412ab401ebaa809aa5f85966b74628600f # v7.4.0
           with:
               source: .
@@ -56,15 +50,3 @@ runs:
                   ${{ steps.meta.outputs.bake-file-annotations }}
               targets: ci
               push: true
-
-        # The runner evaluates the outputs of the action again after the post steps, when the outputs of the steps are
-        # empty, so parsing the metadata in the output itself fails the job. Bake keys the metadata by the name of the
-        # target, and --exit-status fails the step when the digest is missing.
-        - name: Read the digest of the image
-          id: digest
-          shell: bash
-          run: |
-              digest=$(jq --exit-status --raw-output '.ci["containerimage.digest"]' <<< "$METADATA")
-              echo "digest=$digest" >> "$GITHUB_OUTPUT"
-          env:
-              METADATA: ${{ steps.bake.outputs.metadata }}

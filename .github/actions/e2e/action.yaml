@@ -3,7 +3,7 @@ description: Runs the image behind Caddy with Docker Compose and runs the end-to
 
 inputs:
     image:
-        description: The image to test, by tag or by digest
+        description: The image to test
         required: true
     username:
         description: The Docker Hub account to log in with

@@ -62,8 +62,6 @@ jobs:
         concurrency:
             group: docker-pr-${{ github.event.pull_request.number }}
             cancel-in-progress: true
-        outputs:
-            digest: ${{ steps.docker.outputs.digest }}
         steps:
             # Fails rather than skips, since a skipped required check counts as passed and would let the change merge
             # without an image.
@@ -78,13 +76,13 @@ jobs:
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Build and push the image
-              id: docker
               uses: ./.github/actions/docker
               with:
                   username: ${{ vars.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
 
-    # Tests the image that the Docker job pushed, or edge when the pull request leaves the image alone.
+    # Tests the image that the Docker job pushed, or edge when the pull request leaves the image alone. A newer push only
+    # moves pr-<N> once its own Docker job ends, and its E2E job then cancels this one.
     e2e:
         name: E2E
         needs: [changes, docker]
@@ -112,7 +110,7 @@ jobs:
               shell: bash
               run: |
                   case "$DOCKER_RESULT" in
-                      success) echo "ref=$DOCKERHUB_USERNAME/api-content@$DIGEST" >> "$GITHUB_OUTPUT" ;;
+                      success) echo "ref=$DOCKERHUB_USERNAME/api-content:pr-$PR_NUMBER" >> "$GITHUB_OUTPUT" ;;
                       skipped) echo "ref=$DOCKERHUB_USERNAME/api-content:edge" >> "$GITHUB_OUTPUT" ;;
                       *)
                           echo "::error::The Docker job ended with $DOCKER_RESULT, so there is no image to test."
@@ -121,7 +119,7 @@ jobs:
                   esac
               env:
                   DOCKER_RESULT: ${{ needs.docker.result }}
-                  DIGEST: ${{ needs.docker.outputs.digest }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
                   DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
 
             - name: Checkout repository
