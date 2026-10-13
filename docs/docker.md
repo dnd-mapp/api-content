@@ -51,7 +51,11 @@ Each event pushes its own tags: a pull request from `pull-request.yaml`, a push 
 
 ### Workflows
 
-On a pull request, the `Docker` job runs in parallel with CI, so reviewers get the image sooner. Once the pull request closes, merged or not, the `remove-image-tag` job of `pull-request-closed.yaml` deletes `pr-<N>` through the Docker Hub API. It cancels a build of the pull request that is still running, so the tag cannot come back. Pull requests from forks get no secrets, so both jobs skip them.
+On a pull request, the `Docker` job runs in parallel with CI, so reviewers get the image sooner. Once the pull request closes, merged or not, the `remove-image-tag` job of `pull-request-closed.yaml` deletes `pr-<N>` through the Docker Hub API. It cancels a build of the pull request that is still running, so the tag cannot come back.
+
+The `E2E` job runs the [end-to-end suite](building-and-testing.md#end-to-end-tests) against the image behind Caddy. It tests the image that the `Docker` job pushed, by its digest, when the event changed the image, and `edge` otherwise. It pulls the image with `DOCKERHUB_TOKEN_READ` rather than build it in the job. On `main`, it runs after the `docker` job, so `edge` moves before the suite passes, and a failure shows as a failed run on `main`. The ruleset requires a pull request to be up to date with `main`, so the merged files already passed the suite as `pr-<N>`. A release runs no suite, since the commit that its tag points at passed it on `main`.
+
+A pull request from a fork gets no secrets, so it can neither push nor pull an image. Its `Docker` job fails when the [`image` filter](#path-filter) is true, and its `E2E` job fails when the `e2e` filter is true, each with an error that a maintainer pushes the branch to `dnd-mapp/api-content` to test it. They fail rather than skip, since a skipped required check counts as passed and would let the change merge untested. A pull request from a fork that touches neither filter passes. The `remove-image-tag` job skips it, since it pushed no tag.
 
 On `main`, the `docker` job waits for CI, so `edge` only moves to a commit that passed. A release rebuilds the image at the tag after the CI checks, rather than retagging the build of `main`, so its labels and provenance name the version.
 
@@ -62,6 +66,8 @@ On pull requests and on `main`, a `changes` job runs the composite action in `.g
 - The files that `.dockerignore` lets in, without the specs under `src`, which never reach `dist`.
 - The `Dockerfile`, `.dockerignore`, and `docker-bake.hcl`.
 - The composite actions in `.github/actions/docker` and `.github/actions/changes`, and the workflow that runs the job, so a change to the pipeline tests itself.
+
+The `e2e` output tells the `E2E` job to run. It is true when any path of the `image` filter changes, or anything under `e2e` or `.github/actions/e2e`. A change to the suite alone therefore tests `edge`, and a change to the docs alone runs no suite.
 
 A pull request compares with its base, so once it touches the image, every later push rebuilds `pr-<N>`. `main` compares each push with the previous one, which for a merge commit covers the whole pull request. When a merge leaves the image alone, `edge` keeps pointing at the last build, and that commit gets no `sha-<short-sha>` tag. Each workflow passes its own path to the action, so add a new path to the filter in the action alone.
 
@@ -80,7 +86,7 @@ The workflows log in with personal access tokens of the `dndmapp` Docker Hub acc
 | Name                     | Kind     | Scope               | Used by                                                                                            |
 |:-------------------------|:---------|:--------------------|:---------------------------------------------------------------------------------------------------|
 | `DOCKERHUB_USERNAME`     | Variable |                     | Every login, and the namespace of the image                                                        |
-| `DOCKERHUB_TOKEN_READ`   | Secret   | `read`              | Nothing yet                                                                                        |
+| `DOCKERHUB_TOKEN_READ`   | Secret   | `read`              | The E2E jobs of the pull request and `main`                                                        |
 | `DOCKERHUB_TOKEN_WRITE`  | Secret   | `read,write`        | The image jobs of the pull request, `main`, and release                                            |
 | `DOCKERHUB_TOKEN_DELETE` | Secret   | `read,write,delete` | `remove-image-tag` in `pull-request-closed.yaml`, and `docker-hub-description` in `push-main.yaml` |
 
