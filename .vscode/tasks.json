@@ -53,10 +53,18 @@
             "problemMatcher": []
         },
         {
-            "label": "test-e2e",
+            "label": "e2e",
+            "detail": "Runs the end-to-end tests in watch mode with the Vitest UI against a running server, or the dev server it starts",
+            "type": "shell",
+            "command": "pnpm run e2e",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "e2e-ci",
             "detail": "Runs the end-to-end tests once against a running server, or the dev server it starts",
             "type": "shell",
-            "command": "pnpm run test-e2e",
+            "command": "pnpm run e2e-ci",
             "group": "test",
             "problemMatcher": []
         },

@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 const isCI = Boolean(process.env['CI']);
 
-// Runs the end-to-end suite against a live server, with `pnpm run test-e2e`. It measures no coverage, since the server
+// Runs the end-to-end suite against a live server, with `pnpm run e2e` or `pnpm run e2e-ci`. It measures no coverage, since the server
 // runs in another process.
 export default defineConfig({
     test: {
