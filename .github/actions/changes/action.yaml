@@ -46,7 +46,8 @@ runs:
                       - .github/actions/docker/**
                       - .github/actions/changes/**
                       - ${{ inputs.workflow }}
-                  # A change to the suite alone tests the edge image.
+                  # Reuses the paths of the image filter through the YAML anchor &image, which paths-filter flattens
+                  # into one list. A change to the suite alone tests the edge image.
                   e2e:
                       - *image
                       - e2e/**
