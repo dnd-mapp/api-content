@@ -53,6 +53,14 @@
             "problemMatcher": []
         },
         {
+            "label": "test-e2e",
+            "detail": "Runs the end-to-end tests once against a running server, or the dev server it starts",
+            "type": "shell",
+            "command": "pnpm run test-e2e",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
             "label": "build",
             "detail": "Compiles the application with the Nest CLI into dist",
             "type": "shell",
