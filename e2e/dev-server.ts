@@ -44,23 +44,31 @@ function hasExited(child: ChildProcess) {
 }
 
 /**
- * Stops the process and every process that it started, without a dependency such as `tree-kill`. Windows has no
- * process groups, so `taskkill` walks the tree from the process instead.
+ * Signals the process and every process that it started to stop, without a dependency such as `tree-kill`. Windows has
+ * no process groups, so `taskkill` walks the tree from the process instead. It runs synchronously, so a handler of the
+ * `exit` event can call it. Returns whether it sent the signal.
  */
-async function stopProcessTree(child: ChildProcess) {
+function killProcessTree(child: ChildProcess) {
     const { pid } = child;
 
     if (pid === undefined || hasExited(child)) {
-        return;
+        return false;
     }
-    const exited = once(child, 'exit');
-
     if (process.platform === 'win32') {
         spawnSync('taskkill', ['/pid', String(pid), '/T', '/F'], { stdio: 'ignore' });
     } else {
         process.kill(-pid, 'SIGTERM');
     }
-    await exited;
+    return true;
+}
+
+/** Stops the process and every process that it started, and waits until the process exits. */
+async function stopProcessTree(child: ChildProcess) {
+    const exited = once(child, 'exit');
+
+    if (killProcessTree(child)) {
+        await exited;
+    }
 }
 
 /**
@@ -70,7 +78,15 @@ async function stopProcessTree(child: ChildProcess) {
 export async function startDevServer(baseUrl: string): Promise<DevServer> {
     const child = spawnDevServer();
     const output: string[] = [];
-    const stop = async () => await stopProcessTree(child);
+    // Vitest skips the teardown when a signal ends it, such as the stop button of an IDE in watch mode, so the server
+    // also stops when the process of Vitest exits.
+    const killOnExit = () => killProcessTree(child);
+    const stop = async () => {
+        process.off('exit', killOnExit);
+        await stopProcessTree(child);
+    };
+
+    process.once('exit', killOnExit);
 
     child.stdout?.on('data', (chunk: Buffer) => output.push(chunk.toString()));
     child.stderr?.on('data', (chunk: Buffer) => output.push(chunk.toString()));
