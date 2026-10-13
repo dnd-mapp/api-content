@@ -1,0 +1,11 @@
+# Serves the API over HTTPS on localhost, the way the ingress does in production. Caddy issues the certificate from a
+# CA of its own, which the E2E job copies out of the container for Node.js to trust.
+{
+	# The CA only needs the trust of Node.js, not of the trust store inside the container.
+	skip_install_trust
+}
+
+localhost {
+	tls internal
+	reverse_proxy api-content:3000
+}
