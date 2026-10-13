@@ -45,7 +45,9 @@ jobs:
     # Waits for CI, so edge only moves to a commit that passed.
     docker:
         name: Docker
-        needs: [ci, changes]
+        needs:
+            - ci
+            - changes
         if: needs.changes.outputs.image == 'true'
         runs-on: ubuntu-26.04
         timeout-minutes: 10
@@ -70,7 +72,9 @@ jobs:
     # merged files already passed the suite as pr-<N>.
     e2e:
         name: E2E
-        needs: [changes, docker]
+        needs:
+            - changes
+            - docker
         # Without a status function, the job would skip whenever the Docker job skips.
         if: ${{ !cancelled() && needs.changes.outputs.e2e == 'true' }}
         runs-on: ubuntu-26.04
@@ -111,7 +115,8 @@ jobs:
     # date before it merges, so the description on main has already passed them.
     docker-hub-description:
         name: Docker Hub description
-        needs: changes
+        needs:
+            - changes
         if: needs.changes.outputs.description == 'true'
         runs-on: ubuntu-26.04
         timeout-minutes: 2

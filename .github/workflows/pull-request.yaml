@@ -51,7 +51,8 @@ jobs:
 
     docker:
         name: Docker
-        needs: changes
+        needs:
+            - changes
         if: needs.changes.outputs.image == 'true'
         runs-on: ubuntu-26.04
         timeout-minutes: 10
@@ -85,7 +86,9 @@ jobs:
     # moves pr-<N> once its own Docker job ends, and its E2E job then cancels this one.
     e2e:
         name: E2E
-        needs: [changes, docker]
+        needs:
+            - changes
+            - docker
         # Without a status function, the job would skip whenever the Docker job skips.
         if: ${{ !cancelled() && needs.changes.outputs.e2e == 'true' }}
         runs-on: ubuntu-26.04
