@@ -38,6 +38,7 @@ jobs:
             pull-requests: read
         outputs:
             image: ${{ steps.changes.outputs.image }}
+            e2e: ${{ steps.changes.outputs.e2e }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -50,9 +51,9 @@ jobs:
 
     docker:
         name: Docker
-        needs: changes
-        # A pull request from a fork gets no secrets, so it cannot push an image.
-        if: needs.changes.outputs.image == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+        needs:
+            - changes
+        if: needs.changes.outputs.image == 'true'
         runs-on: ubuntu-26.04
         timeout-minutes: 10
         permissions:
@@ -63,6 +64,15 @@ jobs:
             group: docker-pr-${{ github.event.pull_request.number }}
             cancel-in-progress: true
         steps:
+            # Fails rather than skips, since a skipped required check counts as passed and would let the change merge
+            # without an image.
+            - name: Refuse a pull request from a fork
+              if: github.event.pull_request.head.repo.full_name != github.repository
+              shell: bash
+              run: |
+                  echo "::error::A pull request from a fork gets no secrets, so it cannot push an image. A maintainer pushes the branch to dnd-mapp/api-content to test it."
+                  exit 1
+
             - name: Checkout repository
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -71,3 +81,56 @@ jobs:
               with:
                   username: ${{ vars.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
+
+    # Tests the image that the Docker job pushed, or edge when the pull request leaves the image alone. A newer push only
+    # moves pr-<N> once its own Docker job ends, and its E2E job then cancels this one.
+    e2e:
+        name: E2E
+        needs:
+            - changes
+            - docker
+        # Without a status function, the job would skip whenever the Docker job skips.
+        if: ${{ !cancelled() && needs.changes.outputs.e2e == 'true' }}
+        runs-on: ubuntu-26.04
+        timeout-minutes: 10
+        permissions:
+            contents: read
+        concurrency:
+            group: ${{ github.workflow }}-e2e-${{ github.ref }}
+            cancel-in-progress: true
+        steps:
+            # Fails rather than skips, since a skipped required check counts as passed and would let the change merge
+            # untested.
+            - name: Refuse a pull request from a fork
+              if: github.event.pull_request.head.repo.full_name != github.repository
+              shell: bash
+              run: |
+                  echo "::error::A pull request from a fork gets no secrets, so it cannot push an image to test. A maintainer pushes the branch to dnd-mapp/api-content to test it."
+                  exit 1
+
+            - name: Pick the image
+              id: image
+              shell: bash
+              run: |
+                  case "$DOCKER_RESULT" in
+                      success) echo "ref=$DOCKERHUB_USERNAME/api-content:pr-$PR_NUMBER" >> "$GITHUB_OUTPUT" ;;
+                      skipped) echo "ref=$DOCKERHUB_USERNAME/api-content:edge" >> "$GITHUB_OUTPUT" ;;
+                      *)
+                          echo "::error::The Docker job ended with $DOCKER_RESULT, so there is no image to test."
+                          exit 1
+                          ;;
+                  esac
+              env:
+                  DOCKER_RESULT: ${{ needs.docker.result }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Run the end-to-end tests
+              uses: ./.github/actions/e2e
+              with:
+                  image: ${{ steps.image.outputs.ref }}
+                  username: ${{ vars.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN_READ }}

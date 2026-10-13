@@ -1,0 +1,64 @@
+name: End-to-end tests
+description: Runs the image behind Caddy with Docker Compose and runs the end-to-end suite against it over HTTPS
+
+inputs:
+    image:
+        description: The image to test
+        required: true
+    username:
+        description: The Docker Hub account to log in with
+        required: true
+    password:
+        description: A personal access token of the account with the read scope
+        required: true
+
+runs:
+    using: composite
+    steps:
+        - name: Set up Node.js and pnpm and install dependencies
+          uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+          with:
+              cache: true
+              runtime: node
+              require-lockfile: true
+
+        # Pulls with an account rather than anonymously, so the pull counts against its higher rate limit.
+        - name: Log in to Docker Hub
+          uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+          with:
+              username: ${{ inputs.username }}
+              password: ${{ inputs.password }}
+
+        # Leaves the stack running, since the runner is discarded after the job.
+        - name: Start the image behind Caddy
+          shell: bash
+          run: docker compose --file e2e/compose.yaml up --wait
+          env:
+              API_CONTENT_IMAGE: ${{ inputs.image }}
+
+        # Caddy issues the certificate from a CA of its own, which Node.js trusts through NODE_EXTRA_CA_CERTS.
+        - name: Copy the root certificate of Caddy
+          shell: bash
+          run: |
+              docker compose --file e2e/compose.yaml cp caddy:/data/caddy/pki/authorities/local/root.crt \
+                  "$RUNNER_TEMP/caddy-root.crt"
+
+        - name: Run the end-to-end tests
+          shell: bash
+          run: pnpm run e2e-ci
+          env:
+              E2E_BASE_URL: https://localhost:8443
+              NODE_EXTRA_CA_CERTS: ${{ runner.temp }}/caddy-root.crt
+
+        - name: Save the logs of the stack
+          if: failure()
+          shell: bash
+          run: docker compose --file e2e/compose.yaml logs --no-color --timestamps > "$RUNNER_TEMP/e2e-stack.log"
+
+        - name: Upload the logs of the stack
+          if: failure()
+          uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+          with:
+              name: e2e-stack-logs
+              path: ${{ runner.temp }}/e2e-stack.log
+              if-no-files-found: error

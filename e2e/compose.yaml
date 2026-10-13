@@ -1,0 +1,32 @@
+# The stack that the E2E job tests: the image in API_CONTENT_IMAGE, or edge when it is unset, behind Caddy, which
+# terminates TLS like the ingress and publishes port 8443. .github/actions/e2e starts it with `docker compose up --wait`.
+name: api-content-e2e
+
+services:
+    # Runs the image as the image README recommends, and publishes no port, so every request goes through Caddy.
+    api-content:
+        image: ${API_CONTENT_IMAGE:-dndmapp/api-content:edge}
+        read_only: true
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
+
+    caddy:
+        image: caddy:2.11.7@sha256:f2a1290d0463aad60660d4ec134943f183ee2a5f6c3eb7bf32dd984f2f020772
+        depends_on:
+            api-content:
+                condition: service_healthy
+        ports:
+            - "8443:443"
+        volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile:ro
+        # Caddy issues the certificate in the background after it starts, so the stack is ready once the certificate
+        # exists.
+        healthcheck:
+            test: ["CMD", "test", "-f", "/data/caddy/certificates/local/localhost/localhost.crt"]
+            interval: 30s
+            timeout: 3s
+            start_period: 10s
+            start_interval: 1s
+            retries: 3

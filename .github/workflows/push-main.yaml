@@ -30,6 +30,7 @@ jobs:
             contents: read
         outputs:
             image: ${{ steps.changes.outputs.image }}
+            e2e: ${{ steps.changes.outputs.e2e }}
             description: ${{ steps.changes.outputs.description }}
         steps:
             - name: Checkout repository
@@ -44,7 +45,9 @@ jobs:
     # Waits for CI, so edge only moves to a commit that passed.
     docker:
         name: Docker
-        needs: [ci, changes]
+        needs:
+            - ci
+            - changes
         if: needs.changes.outputs.image == 'true'
         runs-on: ubuntu-26.04
         timeout-minutes: 10
@@ -63,11 +66,57 @@ jobs:
                   username: ${{ vars.DOCKERHUB_USERNAME }}
                   password: ${{ secrets.DOCKERHUB_TOKEN_WRITE }}
 
+    # Tests the image that the Docker job pushed by its sha-<short-sha> tag, which names this commit, unlike edge, which
+    # a later push moves. It tests edge when the push leaves the image alone. It runs after the Docker job, so edge
+    # moves before the suite passes. The ruleset requires a pull request to be up to date before it merges, so the
+    # merged files already passed the suite as pr-<N>.
+    e2e:
+        name: E2E
+        needs:
+            - changes
+            - docker
+        # Without a status function, the job would skip whenever the Docker job skips.
+        if: ${{ !cancelled() && needs.changes.outputs.e2e == 'true' }}
+        runs-on: ubuntu-26.04
+        timeout-minutes: 10
+        permissions:
+            contents: read
+        concurrency:
+            group: ${{ github.workflow }}-e2e
+            cancel-in-progress: false
+        steps:
+            - name: Pick the image
+              id: image
+              shell: bash
+              run: |
+                  case "$DOCKER_RESULT" in
+                      success) echo "ref=$DOCKERHUB_USERNAME/api-content:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT" ;;
+                      skipped) echo "ref=$DOCKERHUB_USERNAME/api-content:edge" >> "$GITHUB_OUTPUT" ;;
+                      *)
+                          echo "::error::The Docker job ended with $DOCKER_RESULT, so there is no image to test."
+                          exit 1
+                          ;;
+                  esac
+              env:
+                  DOCKER_RESULT: ${{ needs.docker.result }}
+                  DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Run the end-to-end tests
+              uses: ./.github/actions/e2e
+              with:
+                  image: ${{ steps.image.outputs.ref }}
+                  username: ${{ vars.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN_READ }}
+
     # Skips CI: the CI job of the pull request runs the same checks, and the ruleset requires the branch to be up to
     # date before it merges, so the description on main has already passed them.
     docker-hub-description:
         name: Docker Hub description
-        needs: changes
+        needs:
+            - changes
         if: needs.changes.outputs.description == 'true'
         runs-on: ubuntu-26.04
         timeout-minutes: 2

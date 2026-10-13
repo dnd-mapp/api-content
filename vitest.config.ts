@@ -9,8 +9,9 @@ export default defineConfig({
     test: {
         coverage: {
             enabled: true,
-            // The entry point and the root module only wire the application together, which the end-to-end suite
-            // will cover once it exists. The barrel files only re-export what each module shares.
+            // The entry point and the root module only wire the application together. The end-to-end suite in `e2e`
+            // exercises them from another process, which Vitest cannot measure. The barrel files only re-export what
+            // each module shares.
             exclude: ['src/main.ts', 'src/app.module.ts', 'src/**/index.ts'],
             include: ['src/**/*.ts'],
             provider: 'v8',

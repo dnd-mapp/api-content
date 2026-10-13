@@ -21,6 +21,8 @@
     "build": "nest build",
     "test": "vitest --ui",
     "test-ci": "vitest run",
+    "e2e": "vitest --ui --config e2e/vitest.config.ts",
+    "e2e-ci": "vitest run --config e2e/vitest.config.ts",
     "typecheck": "tsc -b",
     "lint-ts": "eslint",
     "lint-md": "markdownlint-cli2",

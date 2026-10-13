@@ -21,11 +21,17 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `testing/index.ts`                | The public entry of the test helpers, behind the `@/testing` alias                                       |
 | `testing/mocks/fs.ts`             | The mock of `node:fs`, which reads in-memory files that a spec adds with `givenFile`                     |
 | `__mocks__/fs.ts`                 | Forwards `vi.mock('node:fs')` to the mock in `testing`, since Vitest looks for it only in this folder    |
+| `e2e/health.spec.ts`              | The end-to-end specs of the health endpoints, which request a running server                             |
+| `e2e/global-setup.ts`             | Picks the server that the suite requests, and starts the dev server when none answers                    |
+| `e2e/dev-server.ts`               | Starts the dev server, waits until it is ready, and stops its process tree                               |
+| `e2e/vitest.config.ts`            | The Vitest config of the end-to-end suite, which `pnpm run e2e` and `e2e-ci` run                         |
+| `e2e/compose.yaml`                | The stack of the `E2E` job: the image behind Caddy, which terminates TLS                                 |
+| `e2e/Caddyfile`                   | The Caddy config of that stack, which serves `localhost` with a certificate of its own CA                |
 | `.env.example`                    | The environment variables, to copy into a `.env` or `.env.local` file                                    |
 | `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                                               |
 | `tsconfig.json`                   | The solution file, and the shared base that the three projects build on                                  |
 | `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                                      |
-| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals, the test helpers, and the mocks                         |
+| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals, the test helpers, the mocks, and the suite in `e2e`     |
 | `tsconfig.tools.json`             | The tools project, for the config files in the repository root and the scripts in `tools`                |
 | `.docker/healthcheck.js`          | The `HEALTHCHECK` of the Docker image, which requests the readiness endpoint                             |
 
