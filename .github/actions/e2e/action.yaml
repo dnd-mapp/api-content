@@ -42,8 +42,6 @@ runs:
           run: |
               docker compose --file e2e/compose.yaml cp caddy:/data/caddy/pki/authorities/local/root.crt \
                   "$RUNNER_TEMP/caddy-root.crt"
-          env:
-              API_CONTENT_IMAGE: ${{ inputs.image }}
 
         - name: Run the end-to-end tests
           shell: bash
@@ -56,8 +54,6 @@ runs:
           if: failure()
           shell: bash
           run: docker compose --file e2e/compose.yaml logs --no-color --timestamps > "$RUNNER_TEMP/e2e-stack.log"
-          env:
-              API_CONTENT_IMAGE: ${{ inputs.image }}
 
         - name: Upload the logs of the stack
           if: failure()
