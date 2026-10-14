@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { corsSchema } from './cors.config';
 import { serverSchema } from './server.config';
 import { checkTls, tlsSchema } from './tls.config';
 
@@ -10,6 +11,7 @@ import { checkTls, tlsSchema } from './tls.config';
 export const environmentSchema = z
     .object({
         ...serverSchema.shape,
+        ...corsSchema.shape,
         ...tlsSchema.shape,
     })
     .check(checkTls);
