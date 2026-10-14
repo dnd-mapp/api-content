@@ -1,10 +1,4 @@
-import { inject } from 'vitest';
-
-const baseUrl = inject('baseUrl');
-
-async function get(path: string) {
-    return await fetch(new URL(path, baseUrl));
-}
+import { get } from '../utils';
 
 describe('Health endpoints', () => {
     it('GET /health/live answers 200 with the health check result', async () => {

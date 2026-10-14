@@ -22,8 +22,10 @@ The repository is a NestJS workspace with a single application. The Nest CLI rea
 | `testing/index.ts`                | The public entry of the test helpers, behind the `@/testing` alias                                                |
 | `testing/mocks/fs.ts`             | The mock of `node:fs`, which reads in-memory files that a spec adds with `givenFile`                              |
 | `__mocks__/fs.ts`                 | Forwards `vi.mock('node:fs')` to the mock in `testing`, since Vitest looks for it only in this folder             |
-| `e2e/health.spec.ts`              | The end-to-end specs of the health endpoints, which request a running server                                      |
-| `e2e/cors.spec.ts`                | The end-to-end specs of the CORS headers, which send the origin of the dev server of `web-app`                    |
+| `e2e/specs/health.spec.ts`        | The end-to-end specs of the health endpoints, which request a running server                                      |
+| `e2e/specs/cors.spec.ts`          | The end-to-end specs of the CORS headers, which send the origin of the dev server of `web-app`                    |
+| `e2e/utils/index.ts`              | The public entry of the helpers that the end-to-end specs share                                                   |
+| `e2e/utils/requests.ts`           | The helpers that send requests to the server of the suite and read their responses                                |
 | `e2e/global-setup.ts`             | Picks the server that the suite requests, and starts the dev server when none answers                             |
 | `e2e/dev-server.ts`               | Starts the dev server, waits until it is ready, and stops its process tree                                        |
 | `e2e/vitest.config.ts`            | The Vitest config of the end-to-end suite, which `pnpm run e2e` and `e2e-ci` run                                  |
