@@ -50,6 +50,8 @@ These changes do not:
 
 A removed or renamed endpoint, a changed response, and a changed environment variable are breaking changes. So is a change that breaks how the image is run, such as a new port or user, a dropped platform, or a removed tag. Say so in the changelog entry.
 
+A vulnerability fix reaches the image when its Dependabot alert has `runtime` scope, or when it is a Node.js security release. Renovate merges these fixes on its own, so their `Security` entries are written at release time, as [Releasing](../releasing.md) describes. The OS packages of the base image are not tracked yet.
+
 ## Releases
 
 A maintainer ships the recorded changes as described in [Releasing](../releasing.md).
