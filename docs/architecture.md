@@ -4,36 +4,40 @@
 
 The repository is a NestJS workspace with a single application. The Nest CLI reads `nest-cli.json` to find the sources, the entry file, and the TypeScript project it compiles with.
 
-| File                              | Purpose                                                                                                  |
-|:----------------------------------|:---------------------------------------------------------------------------------------------------------|
-| `src/main.ts`                     | Creates the application over HTTPS or HTTP, enables the shutdown hooks, and listens on the host and port |
-| `src/app.module.ts`               | The root module, which loads the configuration and imports the feature modules                           |
-| `src/config/environment.ts`       | The Zod schema that validates every environment variable, merged from the namespaces                     |
-| `src/config/server.config.ts`     | The `server` namespace, with the host and port that the server listens on                                |
-| `src/config/tls.config.ts`        | The `tls` namespace, with the certificate and key that the server serves HTTPS with                      |
-| `src/config/empty-as-unset.ts`    | The helper that treats an empty environment variable as unset                                            |
-| `src/config/index.ts`             | The public entry of the configuration, behind the `@/config` alias                                       |
-| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller                                   |
-| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias                                       |
-| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                                                         |
-| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                                            |
-| `tools/setup-https.ts`            | The `setup-https` script, which creates the certificate of the dev server with mkcert                    |
-| `testing/index.ts`                | The public entry of the test helpers, behind the `@/testing` alias                                       |
-| `testing/mocks/fs.ts`             | The mock of `node:fs`, which reads in-memory files that a spec adds with `givenFile`                     |
-| `__mocks__/fs.ts`                 | Forwards `vi.mock('node:fs')` to the mock in `testing`, since Vitest looks for it only in this folder    |
-| `e2e/health.spec.ts`              | The end-to-end specs of the health endpoints, which request a running server                             |
-| `e2e/global-setup.ts`             | Picks the server that the suite requests, and starts the dev server when none answers                    |
-| `e2e/dev-server.ts`               | Starts the dev server, waits until it is ready, and stops its process tree                               |
-| `e2e/vitest.config.ts`            | The Vitest config of the end-to-end suite, which `pnpm run e2e` and `e2e-ci` run                         |
-| `e2e/compose.yaml`                | The stack of the `E2E` job: the image behind Caddy, which terminates TLS                                 |
-| `e2e/Caddyfile`                   | The Caddy config of that stack, which serves `localhost` with a certificate of its own CA                |
-| `.env.example`                    | The environment variables, to copy into a `.env` or `.env.local` file                                    |
-| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                                               |
-| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on                                  |
-| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                                      |
-| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals, the test helpers, the mocks, and the suite in `e2e`     |
-| `tsconfig.tools.json`             | The tools project, for the config files in the repository root and the scripts in `tools`                |
-| `.docker/healthcheck.js`          | The `HEALTHCHECK` of the Docker image, which requests the readiness endpoint                             |
+| File                              | Purpose                                                                                                           |
+|:----------------------------------|:------------------------------------------------------------------------------------------------------------------|
+| `src/main.ts`                     | Creates the application over HTTPS or HTTP, enables CORS and the shutdown hooks, and listens on the host and port |
+| `src/app.module.ts`               | The root module, which loads the configuration and imports the feature modules                                    |
+| `src/config/environment.ts`       | The Zod schema that validates every environment variable, merged from the namespaces                              |
+| `src/config/server.config.ts`     | The `server` namespace, with the host and port that the server listens on                                         |
+| `src/config/cors.config.ts`       | The `cors` namespace, with the origins whose pages may read the responses in a browser                            |
+| `src/config/tls.config.ts`        | The `tls` namespace, with the certificate and key that the server serves HTTPS with                               |
+| `src/config/empty-as-unset.ts`    | The helper that treats an empty environment variable as unset                                                     |
+| `src/config/index.ts`             | The public entry of the configuration, behind the `@/config` alias                                                |
+| `src/health/health.module.ts`     | The health module, which imports Terminus and registers the controller                                            |
+| `src/health/index.ts`             | The public entry of the health module, behind the `@/health` alias                                                |
+| `src/health/health.controller.ts` | The `/health/live` and `/health/ready` endpoints                                                                  |
+| `nest-cli.json`                   | The Nest CLI config, which `nest build` and `nest start` read                                                     |
+| `tools/setup-https.ts`            | The `setup-https` script, which creates the certificate of the dev server with mkcert                             |
+| `testing/index.ts`                | The public entry of the test helpers, behind the `@/testing` alias                                                |
+| `testing/mocks/fs.ts`             | The mock of `node:fs`, which reads in-memory files that a spec adds with `givenFile`                              |
+| `__mocks__/fs.ts`                 | Forwards `vi.mock('node:fs')` to the mock in `testing`, since Vitest looks for it only in this folder             |
+| `e2e/specs/health.spec.ts`        | The end-to-end specs of the health endpoints, which request a running server                                      |
+| `e2e/specs/cors.spec.ts`          | The end-to-end specs of the CORS headers, which send the origin of the dev server of `web-app`                    |
+| `e2e/utils/index.ts`              | The public entry of the helpers that the end-to-end specs share                                                   |
+| `e2e/utils/requests.ts`           | The helpers that send requests to the server of the suite and read their responses                                |
+| `e2e/global-setup.ts`             | Picks the server that the suite requests, and starts the dev server when none answers                             |
+| `e2e/dev-server.ts`               | Starts the dev server, waits until it is ready, and stops its process tree                                        |
+| `e2e/vitest.config.ts`            | The Vitest config of the end-to-end suite, which `pnpm run e2e` and `e2e-ci` run                                  |
+| `e2e/compose.yaml`                | The stack of the `E2E` job: the image behind Caddy, which terminates TLS                                          |
+| `e2e/Caddyfile`                   | The Caddy config of that stack, which serves `localhost` with a certificate of its own CA                         |
+| `.env.example`                    | The environment variables, to copy into a `.env` or `.env.local` file                                             |
+| `.swcrc`                          | The SWC options that the Nest CLI merges into its defaults                                                        |
+| `tsconfig.json`                   | The solution file, and the shared base that the three projects build on                                           |
+| `tsconfig.app.json`               | The application project, which the type check of `nest build` reads                                               |
+| `tsconfig.spec.json`              | The spec project, which adds the Vitest globals, the test helpers, the mocks, and the suite in `e2e`              |
+| `tsconfig.tools.json`             | The tools project, for the config files in the repository root and the scripts in `tools`                         |
+| `.docker/healthcheck.js`          | The `HEALTHCHECK` of the Docker image, which requests the readiness endpoint                                      |
 
 ## Modules
 

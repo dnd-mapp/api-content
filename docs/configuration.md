@@ -4,13 +4,14 @@
 
 The server reads its configuration from environment variables. It also loads them from a `.env.local` and a `.env` file in the working directory, when those exist. A variable set in the process wins over both files, and `.env.local` wins over `.env`. Copy `.env.example` to start a file of your own; Git ignores both files.
 
-| Variable        |           Default | Purpose                                                                                                     |
-|:----------------|------------------:|:------------------------------------------------------------------------------------------------------------|
-| `HOST`          |         `0.0.0.0` | The hostname or IP address the server listens on, where `0.0.0.0` is every IPv4 address                     |
-| `PORT`          |            `3000` | The port the server listens on, an unprivileged port from 1024 to 65535                                     |
-| `NODE_ENV`      |                   | The environment the server runs in: `development`, `production`, or `test`, where unset means `development` |
-| `TLS_CERT_FILE` | `.certs/cert.pem` | The certificate that the server serves HTTPS with in development                                            |
-| `TLS_KEY_FILE`  |  `.certs/key.pem` | The private key of the certificate                                                                          |
+| Variable        |           Default | Purpose                                                                                                                                                                                                   |
+|:----------------|------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `HOST`          |         `0.0.0.0` | The hostname or IP address the server listens on, where `0.0.0.0` is every IPv4 address                                                                                                                   |
+| `PORT`          |            `3000` | The port the server listens on, an unprivileged port from 1024 to 65535                                                                                                                                   |
+| `CORS_ORIGINS`  |                   | The comma-separated origins that may read the responses in a browser, such as `https://localhost.www.dndmapp.dev:3100` locally and `https://www.dndmapp.nl.eu.org` in production, where unset allows none |
+| `NODE_ENV`      |                   | The environment the server runs in: `development`, `production`, or `test`, where unset means `development`                                                                                               |
+| `TLS_CERT_FILE` | `.certs/cert.pem` | The certificate that the server serves HTTPS with in development                                                                                                                                          |
+| `TLS_KEY_FILE`  |  `.certs/key.pem` | The private key of the certificate                                                                                                                                                                        |
 
 The server validates the variables on startup, and refuses to start when one holds an invalid value.
 

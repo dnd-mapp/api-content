@@ -6,6 +6,9 @@ services:
     # Runs the image as the image README recommends, and publishes no port, so every request goes through Caddy.
     api-content:
         image: ${API_CONTENT_IMAGE:-dndmapp/api-content:edge}
+        environment:
+            # The origin that e2e/specs/cors.spec.ts expects the API to allow, the same one that .env.example sets.
+            CORS_ORIGINS: https://localhost.www.dndmapp.dev:3100
         read_only: true
         cap_drop:
             - ALL

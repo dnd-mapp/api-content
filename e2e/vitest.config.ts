@@ -12,7 +12,7 @@ export default defineConfig({
         execArgv: ['--use-system-ca'],
         globals: true,
         globalSetup: ['e2e/global-setup.ts'],
-        include: ['e2e/**/*.spec.ts'],
+        include: ['e2e/specs/**/*.spec.ts'],
         name: 'api-content-e2e',
         reporters: ['default', ...(isCI ? ['github-actions'] : [])],
     },

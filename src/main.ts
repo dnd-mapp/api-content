@@ -1,4 +1,4 @@
-import { serverConfig, tlsConfig } from '@/config';
+import { corsConfig, serverConfig, tlsConfig } from '@/config';
 import { Logger } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -28,6 +28,12 @@ async function bootstrap() {
     const { adapter, https } = createAdapter();
     const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter);
     const { host, port } = app.get<ConfigType<typeof serverConfig>>(serverConfig.KEY);
+    const { origins } = app.get<ConfigType<typeof corsConfig>>(corsConfig.KEY);
+
+    // Lets the pages of the origins in `CORS_ORIGINS` read the responses. A request from another origin gets its usual
+    // answer without `Access-Control-Allow-Origin`, so the browser keeps the page from reading it. Since the origin is a
+    // list, every response carries `Vary: Origin`.
+    app.enableCors({ origin: origins, methods: ['GET', 'HEAD'] });
 
     // Closes the application on SIGTERM, so a container orchestrator can stop it gracefully.
     app.enableShutdownHooks();
