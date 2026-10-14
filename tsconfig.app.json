@@ -1,13 +1,9 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
-    "extends": "./tsconfig.json",
+    "extends": ["./tsconfig.json", "@dnd-mapp/config-typescript/nestjs"],
     "include": ["src"],
     "exclude": ["src/**/*.spec.ts"],
     "compilerOptions": {
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "module": "esnext",
-        "moduleResolution": "bundler",
         "rootDir": "src"
     }
 }
